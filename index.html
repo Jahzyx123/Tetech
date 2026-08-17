@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NEON FORGE // Techno Prompt Lab for Suno</title>
+<meta name="description" content="Offline-first techno prompt laboratory for Suno — 461 styles, key-aware melody engine, live Web Audio audition, engineer notes and energy arcs.">
+<meta name="theme-color" content="#050806">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23050806'/%3E%3Ctext x='16' y='23' font-size='19' text-anchor='middle' fill='%2339ff14' font-family='monospace' font-weight='bold'%3EN%3C/text%3E%3C/svg%3E">
 <style>
 /* ============================================================
    NEON FORGE — Techno Prompt Lab for Suno
@@ -231,6 +234,49 @@ input[type=number]{width:76px}
 .foot .sig{position:absolute;right:2px;bottom:2px;font-size:10px;letter-spacing:1px;color:var(--green-dim);text-align:right;text-shadow:0 0 8px rgba(57,255,20,.35)}
 kbd{background:#04120a;border:1px solid var(--line-bright);border-radius:4px;padding:1px 6px;font-family:var(--mono);font-size:10px;color:var(--green-soft)}
 
+/* energy arc */
+.arc{display:flex;gap:3px;align-items:flex-end;margin:10px 0 4px;min-height:96px}
+.arcseg{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0}
+.arcbar{width:100%;height:66px;background:#04120a;border:1px solid var(--line);border-radius:5px;
+  display:flex;align-items:flex-end;overflow:hidden}
+.arcfill{width:100%;background:linear-gradient(180deg,var(--green),var(--green-dark));
+  box-shadow:0 0 12px rgba(57,255,20,.4) inset;transition:height .35s cubic-bezier(.4,0,.2,1)}
+.arcname{font-size:9px;letter-spacing:.5px;text-transform:uppercase;color:var(--text-dim);
+  font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.arcmeta{font-family:var(--mono);font-size:9px;color:var(--text-faint)}
+
+/* score */
+.scoretotal{font-family:var(--mono);font-size:22px;font-weight:900;line-height:1}
+.scoretotal.good{color:var(--green);text-shadow:0 0 12px rgba(57,255,20,.5)}
+.scoretotal.mid{color:var(--amber);text-shadow:0 0 12px rgba(255,210,63,.4)}
+.scoretotal.bad{color:var(--red);text-shadow:0 0 12px rgba(255,75,75,.4)}
+.scorerow{display:grid;grid-template-columns:118px 1fr 30px;gap:8px;align-items:center;margin:7px 0}
+.scorerow .sname{font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--text-dim);font-weight:700}
+.scorerow .sbar{height:6px;background:#04120a;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.scorerow .sfill{display:block;height:100%;transition:width .35s ease}
+.sfill.good{background:linear-gradient(90deg,var(--green-dark),var(--green))}
+.sfill.mid{background:linear-gradient(90deg,#7a5f10,var(--amber))}
+.sfill.bad{background:linear-gradient(90deg,#7a1b1b,var(--red))}
+.scorerow .snum{font-family:var(--mono);font-size:11px;text-align:right;font-weight:700}
+.snum.good{color:var(--green-soft)}.snum.mid{color:var(--amber)}.snum.bad{color:var(--red)}
+.scorerow .snote{grid-column:2/4;font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-top:-3px}
+
+/* command palette */
+#cmdSearch{width:100%;margin-bottom:12px;padding:11px 13px;font-size:14px}
+.cmdlist{display:flex;flex-direction:column;gap:4px;max-height:52vh;overflow:auto}
+.cmditem{
+  display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:8px;
+  border:1px solid transparent;background:#04120a;cursor:pointer;transition:.1s;
+}
+.cmditem:hover{border-color:var(--line-bright)}
+.cmditem.sel{border-color:var(--green);background:rgba(57,255,20,.1);box-shadow:0 0 12px rgba(57,255,20,.2)}
+.cmditem .cicon{width:20px;text-align:center;flex-shrink:0}
+.cmditem .cname{font-family:var(--mono);font-size:12.5px;color:var(--text);flex:1}
+.cmditem.sel .cname{color:var(--green-soft)}
+.cmditem .ckey{font-family:var(--mono);font-size:10px;color:var(--text-faint);flex-shrink:0}
+.keytable{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;align-items:center;font-family:var(--mono);font-size:12px}
+.keytable .kd{color:var(--text-dim)}
+
 /* history */
 .hist{display:flex;flex-direction:column;gap:8px;max-height:520px;overflow:auto}
 .hitem{border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:var(--panel);transition:.12s}
@@ -249,13 +295,15 @@ kbd{background:#04120a;border:1px solid var(--line-bright);border-radius:4px;pad
   <header>
     <div class="brand">
       <h1>NEON FORGE<span>// TECHNO PROMPT LAB · SUNO</span></h1>
-      <div class="tag">MAXIMUM-ENERGY · INSTRUMENTAL-SAFE · ONE-CLICK IDEAS</div>
+      <div class="tag">MAXIMUM-ENERGY · INSTRUMENTAL-SAFE · 461 STYLES · AUDIBLE PREVIEW</div>
     </div>
     <div class="header-actions">
       <span class="chip">SEED <b id="seedView">–</b></span>
       <button id="undoBtn" class="ghost" title="Ctrl/Cmd+Z">↶ Undo</button>
       <button id="redoBtn" class="ghost" title="Ctrl/Cmd+Shift+Z">↷ Redo</button>
       <button id="shareBtn" class="ghost">🔗 Share</button>
+      <button id="cmdBtn" class="ghost" title="Command palette (Ctrl/Cmd+K)">⌘ Commands</button>
+      <button id="helpBtn" class="ghost" title="Keyboard shortcuts (?)">⌨</button>
       <button id="powerRollBtn" class="power">⚡ Power roll</button>
     </div>
   </header>
@@ -301,6 +349,27 @@ kbd{background:#04120a;border:1px solid var(--line-bright);border-radius:4px;pad
             <button class="mini miniroll" data-roll="bpm">🎲</button>
             <button class="hidebtn" data-hide="bpm">👁</button>
           </div>
+          <div class="row" id="keyRow"><span class="lbl">Key</span>
+            <select id="rootSel" title="Root note"></select>
+            <select id="scaleSel" title="Scale"></select>
+            <span class="readout" id="keyRead"></span>
+            <button class="lock" data-lock="key">🔓</button>
+            <button class="mini miniroll" data-roll="key">🎲</button>
+            <button class="hidebtn" data-hide="key">👁</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- AUDITION -->
+      <div class="card" id="auditionCard">
+        <h2><span class="dot"></span>Audition<span class="spacer"></span><span class="readout" id="audHud">Idle — press play to hear this recipe.</span><button class="hidebtn" data-hide="auditionCard">👁</button></h2>
+        <div class="cardbody">
+          <div class="row">
+            <span class="toggle" id="auditionBtn"><span class="led"></span>▶ Audition loop</span>
+            <span class="lbl" style="min-width:0">Vol</span>
+            <input type="range" id="audVol" min="0" max="100" value="80" style="max-width:150px">
+          </div>
+          <div class="row"><span class="val dim" style="font-family:var(--sans)">Live Web Audio sketch of the rolled recipe — real key, BPM, swing, motif contour and timbre. Deterministic per seed.</span></div>
         </div>
       </div>
 
@@ -379,9 +448,12 @@ kbd{background:#04120a;border:1px solid var(--line-bright);border-radius:4px;pad
             </select>
           </div>
           <div class="bigval" id="v-arrangement">—</div>
+          <div class="arc" id="arcBox"></div>
+          <div class="row"><span class="readout" id="arcTotal"></span></div>
           <div class="cluster">
             <button class="push" data-roll="arrangement">🎛 Roll arrangement</button>
             <button class="lock" data-lock="arrangement">🔓 Lock</button>
+            <button class="sm ghost" id="copyArcBtn">📋 Copy section tags</button>
           </div>
         </div>
       </div>
@@ -407,15 +479,28 @@ kbd{background:#04120a;border:1px solid var(--line-bright);border-radius:4px;pad
         <div class="cardbody"><div class="toggles" id="layerToggles"></div></div>
       </div>
 
+      <!-- ENGINEER PACK -->
+      <div class="card" id="engineerCard">
+        <h2><span class="dot"></span>Engineer &amp; DJ Pack<span class="spacer"></span><button class="hidebtn" data-hide="engineerCard">👁</button></h2>
+        <div class="cardbody">
+          <div class="bigval" id="engineerBox" style="font-size:12.5px;line-height:1.6">—</div>
+          <div class="cluster"><button class="push" id="copyEngBtn">📋 Copy engineer notes</button></div>
+        </div>
+      </div>
+
       <!-- PRESETS -->
       <div class="card" id="presetsCard">
-        <h2><span class="dot"></span>Presets (localStorage)</h2>
+        <h2><span class="dot"></span>Presets (localStorage)<span class="spacer"></span><button class="hidebtn" data-hide="presetsCard">👁</button></h2>
         <div class="cardbody">
           <div class="row">
             <input type="text" id="presetName" placeholder="Preset name…" style="flex:1;min-width:140px">
             <button class="push" id="savePresetBtn">💾 Save</button>
           </div>
           <div class="toggles" id="presetList" style="margin-top:10px"></div>
+          <div class="cluster">
+            <button class="sm ghost" id="exportBtn">💾 Export session</button>
+            <button class="sm ghost" id="importBtn">📥 Import session</button>
+          </div>
         </div>
       </div>
 
@@ -424,8 +509,23 @@ kbd{background:#04120a;border:1px solid var(--line-bright);border-radius:4px;pad
     <!-- ======================= OUTPUT ======================= -->
     <section class="output">
 
+      <div class="card" id="scoreCard">
+        <h2><span class="dot"></span>Prompt Score<span class="spacer"></span><span class="scoretotal good" id="scoreTotal">–</span><button class="hidebtn" data-hide="scoreCard">👁</button></h2>
+        <div class="cardbody">
+          <div id="scoreBox"></div>
+          <div class="row" style="margin-top:12px">
+            <span class="lbl">A / B</span>
+            <span class="val dim" id="abInfo" style="font-size:11.5px">Slot B empty.</span>
+          </div>
+          <div class="cluster">
+            <button class="sm" id="stashBBtn">📌 Stash to B</button>
+            <button class="sm ghost" id="swapABBtn" disabled>🔄 Swap A ⇄ B</button>
+          </div>
+        </div>
+      </div>
+
       <div class="card" id="variationsCard">
-        <h2><span class="dot"></span>Variations</h2>
+        <h2><span class="dot"></span>Variations<span class="spacer"></span><button class="hidebtn" data-hide="variationsCard">👁</button></h2>
         <div class="cardbody">
           <div class="cluster" style="margin-top:0;margin-bottom:12px">
             <button class="push" data-roll="variations">🎲 Generate 3 variations</button>
@@ -441,6 +541,7 @@ kbd{background:#04120a;border:1px solid var(--line-bright);border-radius:4px;pad
             <button class="tab active" data-tab="style">Style Prompt</button>
             <button class="tab" data-tab="brief">Full Brief</button>
             <button class="tab" data-tab="kit">Suno Kit</button>
+            <button class="tab" data-tab="eng">Engineer</button>
           </div>
           <div class="outbox" id="outbox"></div>
           <div class="outmeta">
@@ -452,14 +553,14 @@ kbd{background:#04120a;border:1px solid var(--line-bright);border-radius:4px;pad
       </div>
 
       <div class="card" id="historyCard">
-        <h2><span class="dot"></span>History<span class="spacer"></span><button class="ghost sm" id="clearHistoryBtn" title="Clear history">🗑 Clear</button></h2>
+        <h2><span class="dot"></span>History<span class="spacer"></span><button class="ghost sm" id="clearHistoryBtn" title="Clear history">🗑 Clear</button><button class="hidebtn" data-hide="historyCard">👁</button></h2>
         <div class="cardbody">
           <div class="hist" id="historyList"><div class="readout">Copied and applied ideas will appear here.</div></div>
         </div>
       </div>
 
       <div class="foot">
-        <p><kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>Z</kbd> undo · <kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> redo · <kbd>P</kbd> power roll</p>
+        <p><kbd>⌘K</kbd> commands · <kbd>P</kbd> power roll · <kbd>Space</kbd> audition · <kbd>⌘Z</kbd> undo · <kbd>?</kbd> all shortcuts</p>
         <p style="margin-top:6px">Works offline · open this file directly or run <kbd>python3 -m http.server 8080</kbd></p>
         <div class="sig">Powered by Arena</div>
       </div>
@@ -478,6 +579,30 @@ kbd{background:#04120a;border:1px solid var(--line-bright);border-radius:4px;pad
     <div class="modalbody">
       <input type="text" id="styleSearch" placeholder="Search styles…">
       <div class="stylegrid" id="styleGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- COMMAND PALETTE -->
+<div class="modal" id="cmdModal">
+  <div class="modalbox" style="width:min(560px,100%)">
+    <div class="modalhead">
+      <h3>Command palette</h3>
+      <span class="readout">↑↓ navigate · ⏎ run · esc close</span>
+    </div>
+    <div class="modalbody">
+      <input type="text" id="cmdSearch" placeholder="Type a command…" autocomplete="off">
+      <div id="cmdList" class="cmdlist"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SHORTCUTS -->
+<div class="modal" id="helpModal">
+  <div class="modalbox" style="width:min(560px,100%)">
+    <div class="modalhead"><h3>Keyboard shortcuts</h3><button class="ghost sm" id="helpClose">✕</button></div>
+    <div class="modalbody">
+      <div class="keytable" id="keyTable"></div>
     </div>
   </div>
 </div>
@@ -592,6 +717,90 @@ const STYLES = [
   {n:"Leviathan Techno",c:"rare"},{n:"Kraken Techno",c:"rare"},{n:"Megalith Techno",c:"rare"},
   {n:"Obelisk Techno",c:"rare"},{n:"Monument Techno",c:"rare"},{n:"Citadel Techno",c:"rare"},
   {n:"Bastion Techno",c:"rare"},{n:"Fortress Techno",c:"rare"},{n:"Stronghold Techno",c:"rare"},
+  // ==== expansion pack: core ====
+  {n:"Berlin Techno",c:"core"},{n:"Birmingham Techno",c:"core"},{n:"Trance Techno",c:"core"},
+  {n:"Dub Techno Drive",c:"core"},{n:"Club Techno",c:"core"},{n:"Underground Techno",c:"core"},
+  // ==== expansion pack: sub ====
+  {n:"Percussive Techno",c:"sub"},{n:"Broken Techno",c:"sub"},{n:"Bleep Techno",c:"sub"},
+  {n:"Rave Stab Techno",c:"sub"},{n:"Hoover Techno",c:"sub"},{n:"Mentasm Techno",c:"sub"},
+  {n:"Belgian Rave Techno",c:"sub"},{n:"New Beat Techno",c:"sub"},{n:"Body Music Techno",c:"sub"},
+  {n:"Coldwave Techno",c:"sub"},{n:"Post-Punk Techno",c:"sub"},{n:"No-Wave Techno",c:"sub"},
+  {n:"Noise Techno",c:"sub"},{n:"Distortion Techno",c:"sub"},{n:"Saturation Techno",c:"sub"},
+  {n:"Overload Techno",c:"sub"},{n:"Clipping Techno",c:"sub"},{n:"Transient Techno",c:"sub"},
+  {n:"Kick-Roll Techno",c:"sub"},{n:"Ghost-Note Techno",c:"sub"},{n:"Swing Techno",c:"sub"},
+  {n:"Shuffle Techno",c:"sub"},{n:"Triplet Techno",c:"sub"},{n:"Polyrhythm Techno",c:"sub"},
+  {n:"Odd-Meter Techno",c:"sub"},{n:"Syncopation Techno",c:"sub"},{n:"Offbeat Techno",c:"sub"},
+  {n:"Backbeat Techno",c:"sub"},{n:"Downbeat Techno",c:"sub"},{n:"Upbeat Techno",c:"sub"},
+  {n:"Double-Time Techno",c:"sub"},{n:"Half-Time Techno",c:"sub"},{n:"Speed Techno",c:"sub"},
+  {n:"Velocity Techno",c:"sub"},{n:"Momentum Techno",c:"sub"},{n:"Thrust Techno",c:"sub"},
+  {n:"Piston Techno",c:"sub"},{n:"Turbine Techno",c:"sub"},{n:"Reactor Techno",c:"sub"},
+  {n:"Generator Techno",c:"sub"},{n:"Dynamo Techno",c:"sub"},{n:"Voltage Techno",c:"sub"},
+  {n:"Amperage Techno",c:"sub"},{n:"Circuit Techno",c:"sub"},{n:"Transistor Techno",c:"sub"},
+  {n:"Capacitor Techno",c:"sub"},{n:"Resistor Techno",c:"sub"},{n:"Diode Techno",c:"sub"},
+  {n:"Oscillator Techno",c:"sub"},{n:"Modular Techno",c:"sub"},{n:"Eurorack Techno",c:"sub"},
+  {n:"Patchbay Techno",c:"sub"},{n:"Sequencer Techno",c:"sub"},{n:"Arpeggiator Techno",c:"sub"},
+  {n:"Wavetable Techno",c:"sub"},{n:"Granular Techno",c:"sub"},{n:"FM Techno",c:"sub"},
+  {n:"Additive Techno",c:"sub"},{n:"Subtractive Techno",c:"sub"},{n:"Physical-Model Techno",c:"sub"},
+  {n:"Sampler Techno",c:"sub"},{n:"Breakcore Techno",c:"sub"},{n:"Drum-Machine Techno",c:"sub"},
+  {n:"808 Techno",c:"sub"},{n:"909 Techno",c:"sub"},{n:"606 Techno",c:"sub"},
+  {n:"303 Techno",c:"sub"},{n:"Analog Techno",c:"sub"},{n:"Digital Techno",c:"sub"},
+  {n:"Hybrid Techno",c:"sub"},{n:"Outboard Techno",c:"sub"},{n:"Console Techno",c:"sub"},
+  {n:"Tape Techno",c:"sub"},{n:"Vinyl Techno",c:"sub"},{n:"Dubplate Techno",c:"sub"},
+  {n:"Live-Jam Techno",c:"sub"},{n:"Hardware Techno",c:"sub"},{n:"Studio Techno",c:"sub"},
+  {n:"Peak Warehouse Techno",c:"sub"},{n:"Afterhours Techno",c:"sub"},{n:"Sunrise Techno",c:"sub"},
+  {n:"Sunset Techno",c:"sub"},{n:"Closing-Set Techno",c:"sub"},{n:"Opening-Set Techno",c:"sub"},
+  {n:"Main-Room Techno",c:"sub"},{n:"Second-Room Techno",c:"sub"},{n:"Terrace Techno",c:"sub"},
+  {n:"Openair Techno",c:"sub"},{n:"Bunker Rave Techno",c:"sub"},{n:"Squat Rave Techno",c:"sub"},
+  {n:"Illegal Rave Techno",c:"sub"},
+  // ==== expansion pack: rare ====
+  {n:"Tachyon Techno",c:"rare"},{n:"Neutrino Techno",c:"rare"},{n:"Graviton Techno",c:"rare"},
+  {n:"Photon Techno",c:"rare"},{n:"Plasma Techno",c:"rare"},{n:"Fusion-Core Techno",c:"rare"},
+  {n:"Antimatter Techno",c:"rare"},{n:"Event-Horizon Techno",c:"rare"},{n:"Redshift Techno",c:"rare"},
+  {n:"Blueshift Techno",c:"rare"},{n:"Quasar Techno",c:"rare"},{n:"Magnetar Techno",c:"rare"},
+  {n:"Blackhole Techno",c:"rare"},{n:"Hyperspace Techno",c:"rare"},{n:"Warp-Drive Techno",c:"rare"},
+  {n:"Starship Techno",c:"rare"},{n:"Exosphere Techno",c:"rare"},{n:"Stratosphere Techno",c:"rare"},
+  {n:"Ionosphere Techno",c:"rare"},{n:"Terraform Techno",c:"rare"},{n:"Exoplanet Techno",c:"rare"},
+  {n:"Asteroid Techno",c:"rare"},{n:"Comet Techno",c:"rare"},{n:"Meteor Techno",c:"rare"},
+  {n:"Solar-Wind Techno",c:"rare"},{n:"Geomagnetic Techno",c:"rare"},{n:"Tectonic Techno",c:"rare"},
+  {n:"Seismic Techno",c:"rare"},{n:"Magma Techno",c:"rare"},{n:"Obsidian Techno",c:"rare"},
+  {n:"Basalt Techno",c:"rare"},{n:"Granite Techno",c:"rare"},{n:"Glacier Techno",c:"rare"},
+  {n:"Permafrost Techno",c:"rare"},{n:"Tundra Techno",c:"rare"},{n:"Monsoon Techno",c:"rare"},
+  {n:"Typhoon Techno",c:"rare"},{n:"Hurricane Techno",c:"rare"},{n:"Maelstrom Techno",c:"rare"},
+  {n:"Vortex Techno",c:"rare"},{n:"Cyclone Techno",c:"rare"},{n:"Thunderhead Techno",c:"rare"},
+  {n:"Lightning Techno",c:"rare"},{n:"Static-Charge Techno",c:"rare"},{n:"Ionized Techno",c:"rare"},
+  {n:"Radiant Techno",c:"rare"},{n:"Luminous Techno",c:"rare"},{n:"Phosphor Techno",c:"rare"},
+  {n:"Neon-Bloom Techno",c:"rare"},{n:"Chrome Techno",c:"rare"},{n:"Titanium Techno",c:"rare"},
+  {n:"Tungsten Techno",c:"rare"},{n:"Mercury Techno",c:"rare"},{n:"Cobalt Techno",c:"rare"},
+  {n:"Iridium Techno",c:"rare"},{n:"Plutonium Techno",c:"rare"},{n:"Uranium Techno",c:"rare"},
+  {n:"Isotope Techno",c:"rare"},{n:"Reactor-Core Techno",c:"rare"},{n:"Meltdown Techno",c:"rare"},
+  {n:"Fallout Techno",c:"rare"},{n:"Wasteland Techno",c:"rare"},{n:"Scrapyard Techno",c:"rare"},
+  {n:"Salvage Techno",c:"rare"},{n:"Rustbelt Techno",c:"rare"},{n:"Refinery Techno",c:"rare"},
+  {n:"Pipeline Techno",c:"rare"},{n:"Drillsite Techno",c:"rare"},{n:"Oilfield Techno",c:"rare"},
+  {n:"Cargo Techno",c:"rare"},{n:"Freightyard Techno",c:"rare"},{n:"Shipyard Techno",c:"rare"},
+  {n:"Drydock Techno",c:"rare"},{n:"Harbor Techno",c:"rare"},{n:"Lighthouse Techno",c:"rare"},
+  {n:"Bathyal Techno",c:"rare"},{n:"Hadal Techno",c:"rare"},{n:"Trench Techno",c:"rare"},
+  {n:"Kelp-Forest Techno",c:"rare"},{n:"Coral Techno",c:"rare"},{n:"Leviathan Rave Techno",c:"rare"},
+  {n:"Mythos Techno",c:"rare"},{n:"Oracle Techno",c:"rare"},{n:"Prophecy Techno",c:"rare"},
+  {n:"Runic Techno",c:"rare"},{n:"Glyph Techno",c:"rare"},{n:"Cipher Techno",c:"rare"},
+  {n:"Cryptic Techno",c:"rare"},{n:"Enigma Techno",c:"rare"},{n:"Paradox Techno",c:"rare"},
+  {n:"Anomaly Techno",c:"rare"},{n:"Glitch-Oracle Techno",c:"rare"},{n:"Dreamstate Techno",c:"rare"},
+  {n:"Hypnagogic Techno",c:"rare"},{n:"Lucid Techno",c:"rare"},{n:"Ethereal Techno",c:"rare"},
+  {n:"Liminal Techno",c:"rare"},{n:"Threshold Techno",c:"rare"},{n:"Gateway Techno",c:"rare"},
+  {n:"Portal Techno",c:"rare"},{n:"Ascension Techno",c:"rare"},{n:"Apotheosis Techno",c:"rare"},
+  {n:"Elysium Techno",c:"rare"},{n:"Valhalla Techno",c:"rare"},{n:"Olympus Techno",c:"rare"},
+  {n:"Pantheon Techno",c:"rare"},{n:"Seraph Techno",c:"rare"},{n:"Cherubim Techno",c:"rare"},
+  {n:"Archangel Techno",c:"rare"},{n:"Purgatory Techno",c:"rare"},{n:"Limbo Techno",c:"rare"},
+  {n:"Styx Techno",c:"rare"},{n:"Charon Techno",c:"rare"},{n:"Cerberus Techno",c:"rare"},
+  {n:"Hydra Techno",c:"rare"},{n:"Chimera Techno",c:"rare"},{n:"Basilisk Techno",c:"rare"},
+  {n:"Wyvern Techno",c:"rare"},{n:"Golem Techno",c:"rare"},{n:"Automaton Techno",c:"rare"},
+  {n:"Android Techno",c:"rare"},{n:"Replicant Techno",c:"rare"},{n:"Cyborg Techno",c:"rare"},
+  {n:"Exosuit Techno",c:"rare"},{n:"Mecha Techno",c:"rare"},{n:"Gundam-Rave Techno",c:"rare"},
+  {n:"Netrunner Techno",c:"rare"},{n:"Darknet Techno",c:"rare"},{n:"Firewall Techno",c:"rare"},
+  {n:"Blacksite Techno",c:"rare"},{n:"Deadzone Techno",c:"rare"},{n:"Killswitch Techno",c:"rare"},
+  {n:"Overclock Techno",c:"rare"},{n:"Kernel-Panic Techno",c:"rare"},{n:"Bluescreen Techno",c:"rare"},
+  {n:"Bitcrush Techno",c:"rare"},{n:"Datamosh Techno",c:"rare"},{n:"Corrupted-File Techno",c:"rare"},
+  {n:"Checksum Techno",c:"rare"},{n:"Bytecode Techno",c:"rare"},{n:"Assembly Techno",c:"rare"},
+  {n:"Mainframe Techno",c:"rare"},{n:"Server-Farm Techno",c:"rare"},
 ];
 
 function pickStyle(){
@@ -624,7 +833,17 @@ const FEELINGS = [
   "furious joy","ecstatic rage","weightless","unbound","reborn","electric and alive","blazing",
   "vengeful","glorious","exultant","feverish","hypnotized","dreamlike","volcanic","thunderous",
   "reckless","invincible","wild-eyed","manic","overjoyed","rapturous","proud","defiant",
-  "restless","hungry","on fire","alive","superhuman","unstoppable","exhilarated","vibrant"
+  "restless","hungry","on fire","alive","superhuman","unstoppable","exhilarated","vibrant",
+  "incandescent","seismic","molten",
+  "adrenalized","untouchable","skyward",
+  "ravenous","monumental","galvanized",
+  "thunderstruck","white-hot","supercharged",
+  "irrepressible","colossal","meteoric",
+  "delirious with joy","gloriously unhinged","tender and titanic",
+  "holy and violent","bright as a flare","furiously tender",
+  "euphoric and unrelenting","sacred and savage","burning clean",
+  "alive at the edge","triumphant through ruin","ecstatic and exact",
+  "hungry for the drop","luminous and enraged"
 ];
 const FLAVORS = [
   "dangerously alive","bittersweet and powerful","ferociously hopeful","brutally beautiful",
@@ -639,7 +858,14 @@ const FLAVORS = [
   "raging and tender","exhilarating and raw","feverish and precise","glorious and untamed",
   "electric through the bones","radiant and volatile","triumphant through fire","aching yet blazing",
   "serene then explosive","breathless and vast","thunderous and sweet","unstoppable and bright",
-  "wildly tender","furious and free","hypnotic and fierce","victorious and trembling"
+  "wildly tender","furious and free","hypnotic and fierce","victorious and trembling",
+  "molten and majestic","gleaming through wreckage","tender in the blast radius",
+  "exacting and euphoric","colossal yet intimate","screaming toward sunrise",
+  "holy noise","ruthless and radiant","shivering with voltage",
+  "immense and immediate","polished and punishing","ferocious clarity",
+  "bright teeth and open sky","warm fire in cold steel","precision at full tilt",
+  "cathedral-sized and climbing","gorgeous under pressure","relentlessly uplifting",
+  "harsh light, huge heart","molten gold through iron"
 ];
 const DIRECTIONS = [
   "soaring emotional hook","aggressive octave melody","unforgettable minor-key lead",
@@ -655,7 +881,13 @@ const DIRECTIONS = [
   "siren-like rising motif","melody mirroring the bass an octave up","primal ritual synth melody",
   "weeping then triumphant melody","gravity-defying melodic leap","haunting melody that haunts the drop",
   "euphoric melody doubling the kick","wide cinematic anthem","fragile-to-ferocious melodic arc",
-  "relentless melody locked to the bassline","soaring melody over tribal drums","cold then blazing lead line"
+  "relentless melody locked to the bassline","soaring melody over tribal drums","cold then blazing lead line",
+  "hook that arrives early and never lets go","melody built from one perfect interval","two melodies colliding at the climax",
+  "lead that answers the kick in every gap","motif inverted for the second drop","melody transposed up a fourth after the breakdown",
+  "phrase that doubles in speed each section","stark octave motif over rolling drums","melody that resolves only at the final bar",
+  "hook that keeps climbing past expectation","lead trading fours with the bass","melody hidden in the intro, unleashed at the drop",
+  "wide-spaced motif with enormous room around it","melody that fractures then reassembles","singable four-note anthem",
+  "lead that swells from a whisper of filter to full blast"
 ];
 const LEADS = [
   "soaring supersaw lead","emotional analog mono lead","crystalline FM lead","aggressive distorted lead",
@@ -669,7 +901,13 @@ const LEADS = [
   "swirling granular lead","bowed-string synth lead","neon laser lead","cathedral pad lead","razor saw lead",
   "phosphor glowing lead","vintage FM e-piano lead","acid-searing 303 lead","morphing wavetable lead",
   "twin-detuned pluck lead","glass marimba lead","frozen bell lead","molten analog lead",
-  "rave stab lead","euphoric supersaw stack lead","liquid acid lead","haunted pad-lead hybrid"
+  "rave stab lead","euphoric supersaw stack lead","liquid acid lead","haunted pad-lead hybrid",
+  "hollow PWM lead","screaming hardsync lead","stacked octave brass lead",
+  "tape-warped analog lead","ring-modulated metal lead","choir-less pad-stack lead",
+  "plucked karplus lead","overblown flute-synth lead","acid-drenched resonant lead",
+  "frozen glass arpeggio lead","siren-sweep lead","distorted organ lead",
+  "hyperreal trance lead","gritty tape-saturated lead","luminous crystal lead",
+  "vintage PPG wavetable lead"
 ];
 const PERFS = [
   "played with wide vibrato","played with huge pitch bends","performed with aggressive gating",
@@ -689,8 +927,12 @@ const HARMONIES = [
   "epic four-on-the-floor chord stabs","weeping minor-ninth harmony","triumphant plagal resolution",
   "soaring major-lift over minor bass","hypnotic two-chord trance vamp","cinematic minor-sixth fall",
   "ecstatic seventh-chord lift","dark whole-step shift","radiant suspension that never resolves",
-  "pulsing filtered chord stabs","anthemic octave-rooted harmony"
+  "pulsing filtered chord stabs","anthemic octave-rooted harmony",
+  "stacked fifths climbing every eight bars","suspended chord that finally resolves at the climax","dark minor drone under a bright top line",
+  "two-chord loop that never stops rising","modal interchange for the final lift","pedal-point bass under shifting chords",
+  "widening voicings as the track builds","chord stabs answering the kick"
 ];
+/* Retained for reference/vocabulary; harmonic colour now derives from SCALES. */
 const CHORD_COLORS = [
   "natural minor","harmonic minor","phrygian","dorian","lydian","mixolydian","aeolian",
   "minor with raised seventh","parallel major","dark phrygian dominant","double harmonic",
@@ -726,7 +968,11 @@ const BASS_VOICES = [
   "resonant 303 acid bass","sine sub with saturated overtones","gritty hardgroove bass","detuned dual-oscillator bass",
   "wall-of-sub pressure bass","acid-squelch 303 bass","overdriven saw bass","sub-bass with mid-layer growl",
   "punchy square bass","rolling psy-bass","hardcore distorted bass","gravel FM bass","throbbing pulse bass",
-  "subterranean drone bass","liquid filter bass","double-octave layered bass"
+  "subterranean drone bass","liquid filter bass","double-octave layered bass",
+  "tape-saturated sub","brutal clipped bass","talking formant bass",
+  "hollow wooden bass","hoover-stack bass","triple-oscillator monster bass",
+  "filthy distorted reese","clean deep sine sub","grinding industrial bass",
+  "bit-crushed digital bass","phase-shifted wide bass","plucked analog bass"
 ];
 const BASS_MOVES = [
   "rolling octave movement","syncopated offbeat movement","driving eighth-note movement",
@@ -750,12 +996,17 @@ const KICKS = [
   "punishing distorted kick","huge 909 kick","metallic hard kick","cavernous rumble kick",
   "bouncing hardgroove kick","sub-heavy warehouse kick","gated machine kick","overdriven peak-time kick",
   "tunnel kick with long decay","relentless four-on-the-floor kick","slamming distorted kick",
-  "reverb-drenched arena kick","double-kick bursts","airy 909 kick","compressed stadium kick","slammed hardcore kick"
+  "reverb-drenched arena kick","double-kick bursts","airy 909 kick","compressed stadium kick","slammed hardcore kick",
+  "rolling distorted kick","thunderclap kick","tight punchy kick",
+  "kick with a long distorted tail","layered triple kick","clipped hardstyle kick",
+  "dry warehouse thump","booming cathedral kick"
 ];
 const HATS = [
   "relentless 16th-note hats","aggressive open hats","metallic machine hats","shuffling offbeat hats",
   "tightly gated hats","sizzling ride-led hats","rolling closed hats","swung peak-time hats",
-  "machine-gun 32nd hats","open-hat washes","stutter hats","live-feel shaker hats","driving offbeat hats"
+  "machine-gun 32nd hats","open-hat washes","stutter hats","live-feel shaker hats","driving offbeat hats",
+  "razor-thin closed hats","washing open-hat cymbals","triplet hat rolls",
+  "filtered rising hats","reversed hat swells","dense industrial hat clatter"
 ];
 const SNARES = [
   "snappy industrial snare","huge clap","metallic snare crack","reverb-washed clap",
@@ -766,7 +1017,10 @@ const PERCS = [
   "aggressive industrial percussion","tribal tom impact","shaker pulse","rimshot accents",
   "metallic cowbell strikes","found-object machine percussion","bongo roll","woodblock groove",
   "steel-pan shimmer","ratcheting industrial clicks","steel drum accents","clave accents",
-  "metal pipe hits","trash-can percussion","congas and bongos","clattering metallic fills"
+  "metal pipe hits","trash-can percussion","congas and bongos","clattering metallic fills",
+  "anvil strikes","chain rattles","hydraulic hiss accents",
+  "glass shard percussion","sheet-metal crashes","factory stamp hits",
+  "ceramic click patterns","hand-drum flurries"
 ];
 const TOMS = [
   "rolling tom fills","descending tom runs","tribal tom cascade","explosive tom breaks",
@@ -778,7 +1032,9 @@ const GROOVES = [
   "bouncy hardgroove bounce","tunnel-driving straight groove","percussive machine groove",
   "hypnotic rolling groove","explosive peak-time groove","stomping warehouse groove","relentless rave groove",
   "driving peak-time stomp","relentless machine shuffle","four-on-the-floor with rolling percussion",
-  "double-time hardgroove","driving tribal stomp"
+  "double-time hardgroove","driving tribal stomp",
+  "locked-in machine groove","surging rolling drive","militant marching groove",
+  "swaggering hardgroove roll","runaway train groove","pounding stadium groove"
 ];
 const SWINGS = [
   "straight rigid timing","subtle shuffle swing","hardgroove swung feel","triplet shuffle",
@@ -794,7 +1050,9 @@ const SYNCS = [
 const INTENSITIES = [
   "explosive fills","unrelenting pressure","brutal full-force impact","maximum-energy overdrive",
   "wall-of-sound density","merciless drive","frenzied peak intensity","overwhelming sonic force",
-  "wall-of-noise climax","frenzied breakbeat energy","maximum peak pressure","all-out percussive assault"
+  "wall-of-noise climax","frenzied breakbeat energy","maximum peak pressure","all-out percussive assault",
+  "escalating to total saturation","peak-hour devastation","relentless forward pressure",
+  "full-spectrum assault","overwhelming crescendo","sustained maximum output"
 ];
 
 /* ---------------------------- CONCEPT POOLS ---------------------------- */
@@ -818,7 +1076,15 @@ const CONCEPT = {
     "orbital ring city at dawn","volcanic forge powering a whole planet",
     "deep-sea data temple","storm-scoured sky platform","desert of broken glass under three moons",
     "vertical city carved into a canyon wall","floating market above a gas giant","hive-mind metropolis",
-    "rave inside a living supercomputer","graveyard of fallen satellites","city on the back of a migrating leviathan"
+    "rave inside a living supercomputer","graveyard of fallen satellites","city on the back of a migrating leviathan",
+    "sky-mine hanging from a broken moon","cathedral grown from coral and cable",
+    "rave in the ruins of a particle accelerator","frozen ocean lit from beneath",
+    "colony ship waking its passengers early","tower that broadcasts a single endless chord",
+    "salt flats under an artificial aurora","engine city that never stops turning",
+    "archive of every sound ever made","forest of antennas humming with wind",
+    "reactor bloom over a silent sea","mountain hollowed into a resonating chamber",
+    "orbital cathedral of solar mirrors","mega-dam holding back a wall of light",
+    "bazaar built inside a fallen starship","glass desert humming at the root note"
   ],
   location: [
     "inside a drowned transit terminal","on the observation deck of a dying skyscraper",
@@ -834,7 +1100,12 @@ const CONCEPT = {
     "atop a wind turbine in a hurricane","inside a levitating arcade","on a gantry above molten metal",
     "in a flooded control cathedral","on the spine of a sleeping colossus","inside a glass rainstorm",
     "at the heart of a particle storm","on a rooftop garden above the smog","in the belly of a hollow moon",
-    "on the precipice of a data waterfall","inside an engine room at full burn"
+    "on the precipice of a data waterfall","inside an engine room at full burn",
+    "on a catwalk above the turbine floor","inside the resonating chamber of a giant bell",
+    "at the mouth of a tunnel bored through a glacier","on the roof of a moving freight train",
+    "inside a decommissioned missile silo","on a pontoon stage in a flooded plaza",
+    "at the centre of a mirrored maze","deep in the cooling stacks",
+    "on the launch pad ninety seconds before ignition","inside a cathedral organ the size of a city block"
   ],
   visual: [
     "emerald light refracting through black water","crimson floodlights through smoke",
@@ -846,7 +1117,12 @@ const CONCEPT = {
     "heat haze warping the far wall","constellations projected onto moving bodies",
     "neon signage shorting out in waves","ice crystals glittering in the strobes",
     "fireflies of static orbiting the stage","chrome columns dripping with condensation",
-    "a single red beacon turning above the crowd","waterfall of light pouring over the floor"
+    "a single red beacon turning above the crowd","waterfall of light pouring over the floor",
+    "green lasers cutting through hanging dust","sparks fountaining from an overhead rail",
+    "the whole room strobing in time with the sub","steam venting in rhythmic bursts",
+    "reflections doubling infinitely in black glass","emergency lights sweeping across the crowd",
+    "phosphorescent paint igniting under UV","smoke sculpted into columns by the bass",
+    "a wall of screens showing one slow sunrise","light bending around the speaker stacks"
   ],
   narrative: [
     "an alien signal turns panic into celebration","a machine learns to feel for the first time",
@@ -863,7 +1139,10 @@ const CONCEPT = {
     "the last archive of music is unlocked at the peak","a city's heartbeat syncs to the drop",
     "two rival crews unite for one final dance","a machine dreams of a dawn it will never see",
     "the map to a lost world hides inside a melody","a signal loops forever, growing stronger each cycle",
-    "the wall between worlds thins at 3am"
+    "the wall between worlds thins at 3am",
+    "an engineer hears the machine answer back","a lost transmission finally finds its audience",
+    "the crowd teaches the machines how to celebrate","one melody survives the end of everything",
+    "a city remembers how to move together","the loudest night becomes the one that saves them"
   ],
   sensation: [
     "bass moving through the chest like an earthquake","the kick rattling the ribs",
@@ -872,7 +1151,11 @@ const CONCEPT = {
     "air pressure dropping before the drop","every hair standing on end","the floor vibrating through the soles",
     "a surge of adrenaline at the crest","gravity doubling with the low end","the room breathing in unison",
     "a shiver racing down the spine","the beat syncing to the heartbeat","goosebumps in the breakdown",
-    "the sound field squeezing the air","the ground rolling like a living thing"
+    "the sound field squeezing the air","the ground rolling like a living thing",
+    "teeth buzzing with the low end","the air thick enough to lean on",
+    "sweat cooling in the breakdown draft","the drop landing like a physical shove",
+    "hearing narrowing to only the kick","time stretching in the final build",
+    "the floor breathing under a thousand feet","the whole body tuned to one frequency"
   ],
   event: [
     "the first sunrise in a hundred years hits the dancefloor","the reactor reaches critical and the drop hits",
@@ -887,7 +1170,11 @@ const CONCEPT = {
     "the crowd's heartbeat becomes the kick drum","a supernova blooms exactly on the snare",
     "the floodlights ignite the moment the bass drops","gravity reverses for one bar",
     "the signal reaches home and the room detonates","a thousand fireworks bloom inside the kick",
-    "the moon splits open to reveal a second dancefloor","the final chord hits and the city goes silent"
+    "the moon splits open to reveal a second dancefloor","the final chord hits and the city goes silent",
+    "the power grid surges and every light peaks at once","the roof retracts on the final chorus of synths",
+    "ten thousand phones go dark and only the lasers remain","the bass knocks a decade of dust from the rafters",
+    "the second sun rises exactly on the last bar","the machines join the rhythm on their own",
+    "the storm arrives and nobody stops dancing","the countdown ends and the room becomes light"
   ],
   conflict: [
     "machines rising against a dying sun","the last humans versus the encroaching dark",
@@ -897,7 +1184,10 @@ const CONCEPT = {
     "silence versus the coming storm","the machine heart versus the human heart",
     "the old world versus the new signal","the dying star versus the endless rave",
     "logic versus ecstasy","the walls versus the bass","the past versus the drop",
-    "the frozen city versus the melting beat"
+    "the frozen city versus the melting beat",
+    "entropy versus the groove","the curfew versus the crowd",
+    "exhaustion versus one more drop","the silence outside versus the roar within",
+    "control versus abandon"
   ],
   crowd: [
     "ten thousand strangers moving as one organism","a future tribe in perfect sync",
@@ -906,7 +1196,10 @@ const CONCEPT = {
     "a hive moving with one heartbeat","survivors of the old world, reborn","the last crowd on Earth",
     "a congregation in a chrome cathedral","workers of the reactor, finally released",
     "pilgrims of the bass","a fleet of dancers drifting between moons","an army of silhouettes against the lasers",
-    "the ancestors returning through the smoke","a city turned into a single dancing body"
+    "the ancestors returning through the smoke","a city turned into a single dancing body",
+    "engineers who built the place, dancing in it at last","two generations moving to the same kick",
+    "a thousand strangers who will never meet again","the night shift released all at once",
+    "dust-covered travellers at the end of a long road","everyone who survived, celebrating loudly"
   ],
   title: [
     "LAST TRANSMISSION","CRITICAL MASS","HEART OF THE MACHINE","FINAL SUNRISE","NEON FLOOD",
@@ -918,14 +1211,28 @@ const CONCEPT = {
     "SIGNAL OF THE DEEP","MONOLITH","THE UNBROKEN","SUPERNOVA REQUIEM","DAWN PROTOCOL",
     "CHROME HEART","FINAL FREQUENCY","NEON AFTERLIFE","GRAVITY WELL","MIDNIGHT IGNITION",
     "LAST LIGHT","IRON SUNRISE","PULSE OF THE VOID","THE GREAT WARM-UP","ECHO CHAMBER",
-    "CATHEDRAL OF BASS","SIGNAL HORIZON","THE FINAL DROP","MIDNIGHT MACHINE","GHOST CIRCUIT"
+    "CATHEDRAL OF BASS","SIGNAL HORIZON","THE FINAL DROP","MIDNIGHT MACHINE","GHOST CIRCUIT",
+    "TURBINE HEART","GLASS DESERT",
+    "OVERPRESSURE","SECOND SUN",
+    "IRON CATHEDRAL","HOLLOW MOON",
+    "MAXIMUM VOLTAGE","THE LONG ASCENT",
+    "BLACK GLASS","RESONANT BODY",
+    "AFTERBURN","TERMINAL VELOCITY",
+    "PHOSPHOR DAWN","THE GREAT MACHINE",
+    "SATELLITE FIRE","UNDERTOW",
+    "STORM CHAMBER","FINAL ASCENT",
+    "TITANIUM BLOOM","THE RECKONING HOUR"
   ],
   transform: [
     "fear becomes euphoria","panic becomes celebration","silence becomes a wall of sound",
     "machines learn to feel","strangers become a tribe","the city becomes the dancefloor",
     "noise becomes melody","grief becomes an anthem","static becomes signal","darkness becomes light",
     "loneliness becomes unity","chaos becomes groove","the end becomes a beginning",
-    "memory becomes music","resistance becomes release","the void becomes a dancefloor"
+    "memory becomes music","resistance becomes release","the void becomes a dancefloor",
+    "exhaustion becomes momentum","ruins become a cathedral",
+    "fear of the dark becomes love of the night","a warning siren becomes a hook",
+    "machinery becomes a heartbeat","the last night becomes the first morning",
+    "isolation becomes communion","weight becomes flight"
   ]
 };
 
@@ -968,7 +1275,17 @@ const LAYERS = [
   {id:"tuning",label:"Tuning",phrase:"detuned wide oscillators"},
   {id:"performance",label:"Performance",phrase:"humanized expressive performance"},
   {id:"sequencing",label:"Sequencing",phrase:"surgical 16-step sequencing"},
-  {id:"visual",label:"Visual world",phrase:"immersive cinematic visual world"}
+  {id:"visual",label:"Visual world",phrase:"immersive cinematic visual world"},
+  {id:"saturation",label:"Saturation",phrase:"analog tape saturation and drive"},
+  {id:"transient",label:"Transients",phrase:"razor-sharp transient definition"},
+  {id:"lowend",label:"Low end",phrase:"colossal weaponised low end"},
+  {id:"sidechain",label:"Sidechain",phrase:"deep pumping sidechain compression"},
+  {id:"risers",label:"Risers",phrase:"screaming risers into every drop"},
+  {id:"impacts",label:"Impacts",phrase:"cinematic sub-impacts on every section change"},
+  {id:"vinyl",label:"Vinyl",phrase:"warm vinyl crackle underneath"},
+  {id:"industrial",label:"Industrial",phrase:"scrap-metal industrial sound design"},
+  {id:"euphoria",label:"Euphoria",phrase:"hands-in-the-air euphoric peak"},
+  {id:"polyrhythm",label:"Polyrhythm",phrase:"interlocking polyrhythmic percussion"}
 ];
 
 /* ---------------------------- MELODIC FORCE ----------------------------
@@ -982,6 +1299,50 @@ const MELODY_FORCE = {
   strong:{label:"Strong", desc:"melody leads, full melodic detail"},
   dominant:{label:"Dominant", desc:"melody is the emotional core of the track"}
 };
+
+/* ---------------------------- MUSICAL KEY ENGINE ----------------------------
+   Real musical data, not just words. Every scale carries semitone intervals so
+   the built-in Web Audio auditioner can play the ACTUAL notes described by the
+   prompt — the melody you read is the melody you hear.
+--------------------------------------------------------------------- */
+const NOTE_NAMES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+const SCALES = [
+  {id:"aeolian",      n:"natural minor",     iv:[0,2,3,5,7,8,10],   mood:"dark, classic techno melancholy"},
+  {id:"harmonicMin",  n:"harmonic minor",    iv:[0,2,3,5,7,8,11],   mood:"exotic tension, dramatic lift"},
+  {id:"phrygian",     n:"phrygian",          iv:[0,1,3,5,7,8,10],   mood:"menacing, ritual, Spanish-dark"},
+  {id:"phrygianDom",  n:"phrygian dominant", iv:[0,1,4,5,7,8,10],   mood:"snake-charmer aggression"},
+  {id:"dorian",       n:"dorian",            iv:[0,2,3,5,7,9,10],   mood:"hopeful minor, hardgroove staple"},
+  {id:"minorPent",    n:"minor pentatonic",  iv:[0,3,5,7,10],       mood:"unmissable hook, zero wrong notes"},
+  {id:"hirajoshi",    n:"hirajoshi",         iv:[0,2,3,7,8],        mood:"stark, alien, cinematic"},
+  {id:"lydian",       n:"lydian",            iv:[0,2,4,6,7,9,11],   mood:"soaring, weightless, euphoric"},
+  {id:"mixolydian",   n:"mixolydian",        iv:[0,2,4,5,7,9,10],   mood:"anthemic major with grit"},
+  {id:"melodicMin",   n:"melodic minor",     iv:[0,2,3,5,7,9,11],   mood:"aching but ascending"},
+  {id:"doubleHarm",   n:"double harmonic",   iv:[0,1,4,5,7,8,11],   mood:"occult, maximal exotic"},
+  {id:"wholeTone",    n:"whole tone",        iv:[0,2,4,6,8,10],     mood:"floating, gravity-free dread"},
+  {id:"octatonic",    n:"octatonic",         iv:[0,2,3,5,6,8,9,11], mood:"mechanical, endlessly climbing"},
+  {id:"locrian",      n:"locrian",           iv:[0,1,3,5,6,8,10],   mood:"unstable, collapsing"}
+];
+const SCALE_BY_ID = {}; SCALES.forEach(s=>SCALE_BY_ID[s.id]=s);
+function scaleOf(s){ return SCALE_BY_ID[s.scaleId] || SCALES[0]; }
+function keyName(s){ return NOTE_NAMES[((s.rootPc|0)%12+12)%12] + " " + scaleOf(s).n; }
+/* Single source of harmonic truth: colour always mirrors the chosen scale. */
+function syncHarmonicColor(s){ s.chordColor = scaleOf(s).n; return s; }
+/* Camelot wheel position — so this track can be matched into a DJ set. */
+function camelot(s){
+  const sc = scaleOf(s);
+  const minorish = sc.iv.indexOf(4) === -1;      // no major third → treat as minor
+  const order = minorish ? [9,4,11,6,1,8,3,10,5,0,7,2] : [0,7,2,9,4,11,6,1,8,3,10,5];
+  const idx = order.indexOf(((s.rootPc|0)%12+12)%12);
+  return (idx<0?1:idx+1) + (minorish ? "A" : "B");
+}
+function freqOf(midi){ return 440 * Math.pow(2, (midi-69)/12); }
+/* Scale degree → MIDI note in the current key (degree may be negative or >len). */
+function scaleNote(s, degree, octave){
+  const iv = scaleOf(s).iv, len = iv.length;
+  const oct = octave + Math.floor(degree/len);
+  const d = ((degree % len) + len) % len;
+  return 12*(oct+1) + (((s.rootPc|0)%12+12)%12) + iv[d];
+}
 
 /* ---------------------------- VOCAL (off by default) ---------------------------- */
 const VOCAL_DIRECTIONS = [
@@ -1014,6 +1375,7 @@ const ATOMS = [
   {key:"primary",      card:"styleCard",      field:"primaryStyle",  label:"Primary"},
   {key:"secondary",    card:"styleCard",      field:"secondaryStyle",label:"Secondary"},
   {key:"bpm",          card:"styleCard",      field:"bpm",           label:"BPM"},
+  {key:"key",          card:"styleCard",      label:"Key",           display:s=>keyName(s)+" · "+camelot(s)},
   {key:"feeling",      card:"feelCard",       label:"Feeling",       display:s=>`${s.feeling} · ${s.flavor}`},
   {key:"direction",    card:"feelCard",       field:"direction",     label:"Direction"},
   {key:"leadVoice",    card:"feelCard",       field:"leadVoice",     label:"Lead"},
@@ -1044,12 +1406,16 @@ const ROLL_FN = {
   primary:      s=>{ s.primaryStyle = pickStyle(); },
   secondary:    s=>{ s.secondaryStyle = pickSecondary(s.primaryStyle); },
   bpm:          s=>{ s.bpm = rollBpmValue(); },
+  key:          s=>{ s.rootPc = Math.floor(rng()*12); s.scaleId = pick(SCALES).id; s.chordColor = scaleOf(s).n; },
   feeling:      s=>{ s.feeling=pick(FEELINGS); s.flavor=pick(FLAVORS); },
   direction:    s=>{ s.direction=pick(DIRECTIONS); },
   leadVoice:    s=>{ s.leadVoice=pick(LEADS); },
   leadPerf:     s=>{ s.leadPerf=pick(PERFS); },
   harmony:      s=>{ s.harmony=pick(HARMONIES); },
-  chordColor:   s=>{ s.chordColor=pick(CHORD_COLORS); },
+  /* Harmonic colour is bound to the key so the prompt can never contradict
+     itself (no "A# double harmonic ... natural minor"). Rolling the colour
+     rolls the scale; rolling the key updates the colour. */
+  chordColor:   s=>{ s.scaleId = pick(SCALES).id; s.chordColor = scaleOf(s).n; },
   arpeggio:     s=>{ s.arpeggio=pick(ARPS); },
   contour:      s=>{ s.contour=pick(CONTOURS); },
   rhythm:       s=>{ s.rhythm=pick(RHYTHMS); },
@@ -1071,7 +1437,7 @@ const ROLL_FN = {
 
 /* roll groups referenced by the cluster buttons (data-roll) */
 const GROUPS = {
-  "primary":["primary"], "secondary":["secondary"], "bpm":["bpm"], "feeling":["feeling"],
+  "primary":["primary"], "secondary":["secondary"], "bpm":["bpm"], "key":["key"], "feeling":["feeling"],
   "feel-melody":["feeling","direction","leadVoice","leadPerf","harmony","chordColor","arpeggio","contour","rhythm"],
   "melody":["direction","leadVoice","leadPerf","harmony","chordColor","arpeggio","contour","rhythm"],
   "bass":["bassVoice","bassMovement","bassRel"],
@@ -1097,13 +1463,15 @@ function defaultLocks(){
   return l;
 }
 function defaultHidden(){
-  return { bpm:false, styleCard:false, feelCard:false, bassCard:false, drumsCard:false,
-           conceptCard:false, arrangementCard:false, modeCard:false, layersCard:false };
+  return { bpm:false, key:false, styleCard:false, feelCard:false, bassCard:false, drumsCard:false,
+           conceptCard:false, arrangementCard:false, modeCard:false, layersCard:false,
+           engineerCard:false, auditionCard:false, scoreCard:false,
+           variationsCard:false, presetsCard:false, historyCard:false };
 }
 function defaultState(){
   return {
     seed: newSeed(),
-    primaryStyle:"", secondaryStyle:"", bpm:140,
+    primaryStyle:"", secondaryStyle:"", bpm:140, rootPc:9, scaleId:"aeolian",
     feeling:"", flavor:"", direction:"", leadVoice:"", leadPerf:"", contour:"", rhythm:"",
     harmony:"", chordColor:"", arpeggio:"",
     bassVoice:"", bassMovement:"", bassRel:"",
@@ -1162,6 +1530,7 @@ function styleLine(){
     else s += " with " + state.secondaryStyle + " influence";
   }
   if(!state.hidden.bpm) s += ", " + state.bpm + " BPM";
+  if(!state.hidden.key) s += ", " + keyName(state);
   return s;
 }
 function emotionLine(){
@@ -1191,10 +1560,22 @@ function bassLine(){
 function drumLine(){
   return "Drums: " + state.kick + ", " + state.hats + ", " + state.snare + ", " + state.perc + ", " + state.groove;
 }
+/* Concept clauses are assembled from CLEAN fields only. A single dirty field
+   (e.g. a world containing a banned word) must never take the whole
+   "Concept:" section down with it — we substitute the next clean fragment. */
+function cleanFrag(v){ return (v && !isDirty(String(v).toLowerCase())) ? v : ""; }
+function firstClean(){
+  for(const v of arguments){ const c = cleanFrag(v); if(c) return c; }
+  return "";
+}
 function conceptLine(compact){
   const c = state.concept;
-  if(compact) return "Concept: " + c.title + " — " + c.world;
-  return "Concept: " + c.title + " — " + c.world + ", " + c.narrative + ", " + c.event;
+  const title = firstClean(c.title, "UNTITLED");
+  const lead  = firstClean(c.world, c.location, c.event, c.narrative, c.crowd, c.transform);
+  if(compact) return "Concept: " + title + (lead ? " — " + lead : "");
+  const rest = [c.world, c.narrative, c.event].map(cleanFrag).filter(Boolean);
+  const body = rest.length ? rest.join(", ") : lead;
+  return "Concept: " + title + (body ? " — " + body : "");
 }
 function arrangementLine(){ return "Arrangement: " + state.arrangement; }
 function enabledLayers(){ return LAYERS.filter(l => state.layers[l.id]); }
@@ -1209,15 +1590,35 @@ function vocalLine(){
   return "";
 }
 
-/* Sanitize: strip vocal clauses (instrumental) and any banned minimal token. */
+/* Sanitize: strip vocal clauses (instrumental) and any banned minimal token.
+   LABEL-AWARE: a clause like "Concept: TITLE — <offending world>," carries the
+   section label. Dropping it whole used to orphan the rest of the section
+   (you'd get the narrative with no "Concept:" prefix). So when a dropped clause
+   starts with a "LABEL: " prefix, the label is carried forward onto the next
+   surviving clause of that section. */
+const CLAUSE_LABEL_RE = /^([A-Z][A-Za-z&\- ]{1,28}:)\s*/;
+function isDirty(low){
+  if(state.instrumental && hasVocalRef(low)) return true;
+  for(const b of BANNED_MINIMAL){ if(low.includes(b)) return true; }
+  return false;
+}
 function sanitize(text){
   const clauses = text.split(/(?<=[.;,])\s+/);
-  const out = clauses.filter(cl => {
-    const low = cl.toLowerCase();
-    if(state.instrumental && hasVocalRef(low)) return false;
-    for(const b of BANNED_MINIMAL){ if(low.includes(b)) return false; }
-    return true;
-  });
+  const out = [];
+  let pendingLabel = "";
+  for(let cl of clauses){
+    const labelMatch = cl.match(CLAUSE_LABEL_RE);
+    if(isDirty(cl.toLowerCase())){
+      // remember the label so the section is not left headless
+      if(labelMatch) pendingLabel = labelMatch[1] + " ";
+      continue;
+    }
+    if(pendingLabel && !labelMatch){
+      cl = pendingLabel + cl.charAt(0).toLowerCase() + cl.slice(1);
+    }
+    pendingLabel = "";
+    out.push(cl);
+  }
   return out.join(" ").replace(/\s+/g," ").trim();
 }
 
@@ -1280,6 +1681,7 @@ function buildFullBrief(){
   const f = state.melodicForce || "balanced";
   const sec = [];
   sec.push("STYLE: " + styleLine() + ".");
+  if(!state.hidden.key) sec.push("KEY: " + keyName(state) + " (Camelot " + camelot(state) + ") — " + scaleOf(state).mood + ".");
   if(!state.hidden.feelCard){
     if(f!=="balanced") sec.push("MELODIC FOCUS: " + MELODY_FORCE[f].desc + ".");
     sec.push("EMOTION: " + state.feeling + " and " + state.flavor + " — " + state.direction + ".");
@@ -1293,12 +1695,25 @@ function buildFullBrief(){
   }
   if(!state.hidden.bassCard) sec.push("BASS: " + state.bassVoice + ", " + state.bassMovement + ", " + state.bassRel + ".");
   if(!state.hidden.drumsCard) sec.push("DRUMS: " + state.kick + "; " + state.hats + "; " + state.snare + "; " + state.perc + "; " + state.toms + "; " + state.groove + "; " + state.swing + "; " + state.sync + "; " + state.intensity + ".");
-  if(!state.hidden.arrangementCard) sec.push("ARRANGEMENT: " + state.arrangement);
+  if(!state.hidden.arrangementCard){
+    sec.push("ARRANGEMENT: " + state.arrangement);
+    sec.push("ENERGY ARC: " + arcLine() + ".");
+  }
   if(!state.hidden.conceptCard) sec.push("CONCEPT — " + c.title + ": World: " + c.world + ". Location: " + c.location + ". Visual: " + c.visual + ". Narrative: " + c.narrative + ". Sensation: " + c.sensation + ". Event: " + c.event + ". Conflict: " + c.conflict + ". Crowd: " + c.crowd + ". Transformation: " + c.transform + ".");
   if(layers.length) sec.push("MIX & DETAIL: " + layers.map(l=>l.phrase).join(", ") + ".");
+  if(!state.hidden.engineerCard) sec.push("ENGINEERING: " + engineerLines().slice(2).join(" "));
   sec.push(state.instrumental ? "VOCAL POLICY: " + SAFETY_LINE + "." : ("VOCAL: " + vocalLine() + "."));
-  let text = sanitize(sec.join("\n\n"));
-  if(text.length > 3000){ text = text.slice(0, 3000); text = text.replace(/\s+\S*$/,""); }
+  // Sanitize each section independently so paragraph breaks survive
+  // (sanitize() collapses whitespace, which used to flatten the whole brief
+  // into one unreadable wall of text).
+  let text = sec.map(s=>sanitize(s)).filter(Boolean).join("\n\n");
+  if(text.length > 3000){
+    // trim whole sections from the end rather than cutting mid-sentence
+    const parts = text.split("\n\n");
+    while(parts.length > 1 && parts.join("\n\n").length > 3000) parts.pop();
+    text = parts.join("\n\n");
+    if(text.length > 3000){ text = text.slice(0,3000).replace(/\s+\S*$/,""); }
+  }
   return text;
 }
 
@@ -1307,16 +1722,31 @@ function buildKit(){
   const sp = buildStylePrompt();
   const fb = buildFullBrief();
   const policy = state.instrumental ? SAFETY_LINE : (state.vocalMode ? "vocal mode enabled — " + pick(VOCAL_DIRECTIONS) : "no vocals");
-  const arrTags = state.duration==="extended"
-    ? "[Intro]\n[Build Up]\n[Drop]\n[Breakdown]\n[Build Up]\n[Drop]\n[Climax]\n[Outro]"
-    : "[Intro]\n[Build Up]\n[Drop]\n[Breakdown]\n[Climax]\n[Outro]";
+  const arrTags = arcTags();
   return [
     "STYLE PROMPT:\n" + sp,
     "FULL BRIEF:\n" + fb,
     "ARRANGEMENT:\n" + arrTags,
+    "ENERGY ARC:\n" + arcLine(),
     "VOCAL POLICY:\n" + policy,
-    "CONCEPT:\n" + c.title + " — " + c.world + "; " + c.location + "; " + c.visual + "; " + c.narrative + "; " + c.sensation + "; " + c.event + "; " + c.conflict + "; " + c.crowd + "; " + c.transform + "."
+    "ENGINEER NOTES:\n" + engineerLines().join("\n"),
+    "DJ NOTES:\n" + djLines().join("\n"),
+    "CONCEPT:\n" + sanitize(c.title + " — " + c.world + "; " + c.location + "; " + c.visual + "; " + c.narrative + "; " + c.sensation + "; " + c.event + "; " + c.conflict + "; " + c.crowd + "; " + c.transform + ".")
   ].join("\n\n");
+}
+
+function buildEngineer(){
+  const c = state.concept;
+  return [
+    "ENGINEER NOTES — " + (c.title||"Untitled"),
+    "",
+    engineerLines().join("\n"),
+    "",
+    "DJ NOTES:",
+    djLines().join("\n"),
+    "",
+    "REFERENCE: " + styleLine() + "."
+  ].join("\n");
 }
 
 /* ---------------------------- RENDER ---------------------------- */
@@ -1330,6 +1760,7 @@ function atomValue(atom){
 }
 
 function render(){
+  syncHarmonicColor(state);
   $("seedView").textContent = state.seed % 1000000;
   $("undoBtn").disabled = undoStack.length===0;
   $("redoBtn").disabled = redoStack.length===0;
@@ -1345,6 +1776,13 @@ function render(){
   $("melodicForceSel").value = state.melodicForce || "balanced";
   $("melodicForceRead").textContent = (MELODY_FORCE[state.melodicForce] || MELODY_FORCE.balanced).desc;
   $("bpmRow").style.display = state.hidden.bpm ? "none" : "flex";
+  $("keyRow").style.display = state.hidden.key ? "none" : "flex";
+  $("rootSel").value = String(((state.rootPc|0)%12+12)%12);
+  $("scaleSel").value = scaleOf(state).id;
+  $("keyRead").textContent = "Camelot " + camelot(state) + " · " + scaleOf(state).mood;
+  $("engineerBox").innerHTML = engineerLines().concat(djLines())
+      .map(l=>{ const i=l.indexOf(":"); return '<b>'+escapeHtml(l.slice(0,i+1))+'</b> '+escapeHtml(l.slice(i+1)); })
+      .join("<br>");
   // emotion + dynamic fields
   $("emotionLine").innerHTML = "<b>Emotion-led melody:</b> " + escapeHtml(state.feeling) + " melody; <b>" + escapeHtml(state.flavor) + "</b>; direction: " + escapeHtml(state.direction);
   ATOMS.forEach(a=>{
@@ -1388,9 +1826,14 @@ function render(){
     btn.textContent = hidden ? "🙈" : "👁";
   });
   // hidden cards
-  ["styleCard","feelCard","bassCard","drumsCard","conceptCard","arrangementCard","modeCard","layersCard"].forEach(id=>{
+  ["styleCard","feelCard","bassCard","drumsCard","conceptCard","arrangementCard","modeCard","layersCard",
+   "engineerCard","auditionCard","scoreCard","variationsCard","presetsCard","historyCard"].forEach(id=>{
     $(id).classList.toggle("hidden", state.hidden[id]);
   });
+  // arc, score, A/B
+  renderArc();
+  renderScore();
+  renderAB();
   // presets
   renderPresets();
   // output + variations
@@ -1420,11 +1863,12 @@ function renderOutput(){
   let text;
   if(currentTab==="style") text = buildStylePrompt();
   else if(currentTab==="brief") text = buildFullBrief();
+  else if(currentTab==="eng") text = buildEngineer();
   else text = buildKit();
   const limit = currentTab==="style" ? 1000 : (currentTab==="brief" ? 3000 : 8000);
   let html = escapeHtml(text);
-  const secs = currentTab==="kit"
-    ? ["STYLE PROMPT:","FULL BRIEF:","ARRANGEMENT:","VOCAL POLICY:","CONCEPT:"]
+  const secs = (currentTab==="kit"||currentTab==="eng")
+    ? ["STYLE PROMPT:","FULL BRIEF:","ARRANGEMENT:","VOCAL POLICY:","CONCEPT:","ENGINEER NOTES:","DJ NOTES:","KEY:","TEMPO:","LOW END:","SIDECHAIN:","STEREO:","MASTER:","CUE:","MIX RANGE:","SLOT:","REFERENCE:","ENERGY ARC:"]
     : ["STYLE:","EMOTION:","MELODY:","HARMONY:","BASS:","DRUMS:","ARRANGEMENT:","CONCEPT —","MIX &amp; DETAIL:","VOCAL POLICY:","VOCAL:"];
   secs.forEach(s=>{ html = html.replace(new RegExp(escapeRe(s),'g'), '<span class="sec">'+s+'</span>'); });
   $("outbox").innerHTML = html;
@@ -1510,7 +1954,7 @@ function flashCards(keys){
 }
 function flash(el){ if(!el) return; el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); }
 
-function afterChange(){ render(); updateURL(); saveAuto(); }
+function afterChange(){ render(); updateURL(); saveAuto(); Audition.refresh(); }
 
 /* ---------------------------- STYLE PICKER ---------------------------- */
 let pickerTarget = "primary";
@@ -1571,7 +2015,7 @@ function fallbackCopy(text, done){
 /* ---------------------------- SHARE URL ---------------------------- */
 function encodeState(s){
   const m = {
-    sd:s.seed, p:s.primaryStyle, s2:s.secondaryStyle, b:s.bpm, f:s.feeling, fl:s.flavor, d:s.direction,
+    sd:s.seed, p:s.primaryStyle, s2:s.secondaryStyle, b:s.bpm, rp:s.rootPc, sc:s.scaleId, f:s.feeling, fl:s.flavor, d:s.direction,
     lv:s.leadVoice, lp:s.leadPerf, ct:s.contour, rh:s.rhythm, h:s.harmony, cc:s.chordColor,
     ar:s.arpeggio, bv:s.bassVoice, bm:s.bassMovement, br:s.bassRel, k:s.kick, ha:s.hats,
     sn:s.snare, pc:s.perc, tm:s.toms, gr:s.groove, sw:s.swing, sy:s.sync, it:s.intensity,
@@ -1589,7 +2033,7 @@ function decodeState(str){
     const s = defaultState();
     if(m.sd!==undefined) s.seed = m.sd;
     const map = {
-      p:"primaryStyle", s2:"secondaryStyle", b:"bpm", f:"feeling", fl:"flavor", d:"direction",
+      p:"primaryStyle", s2:"secondaryStyle", b:"bpm", rp:"rootPc", sc:"scaleId", f:"feeling", fl:"flavor", d:"direction",
       lv:"leadVoice", lp:"leadPerf", ct:"contour", rh:"rhythm", h:"harmony", cc:"chordColor",
       ar:"arpeggio", bv:"bassVoice", bm:"bassMovement", br:"bassRel", k:"kick", ha:"hats",
       sn:"snare", pc:"perc", tm:"toms", gr:"groove", sw:"swing", sy:"sync", it:"intensity",
@@ -1702,6 +2146,547 @@ function renderHistory(){
   });
 }
 
+/* ==================================================================
+   AUDITION ENGINE — Web Audio sketch of the current recipe
+   ------------------------------------------------------------------
+   Not a DAW: a fast, honest sketch so you can hear whether a rolled
+   idea is worth sending to Suno. Everything it plays is derived from
+   real state — BPM, key/scale, melodic force, swing, weirdness, and
+   keyword-sniffed timbre from the rolled kick/bass/lead text.
+   Deterministic: seeded from state.seed, so the same link = same loop.
+   Built lazily on first play (no AudioContext until the user asks).
+   ================================================================== */
+const Audition = (function(){
+  let ctx=null, master=null, comp=null, playing=false, timer=null;
+  let step=0, nextTime=0, startedAt=0, curBar=0;
+  const LOOKAHEAD=0.10, TICK=25;
+  let arng = mulberry32(1);
+
+  function ensure(){
+    if(ctx) return ctx;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return null;
+    ctx = new AC();
+    comp = ctx.createDynamicsCompressor();
+    comp.threshold.value=-10; comp.knee.value=6; comp.ratio.value=8;
+    comp.attack.value=.003; comp.release.value=.18;
+    master = ctx.createGain(); master.gain.value=0.9;
+    comp.connect(master); master.connect(ctx.destination);
+    return ctx;
+  }
+  function has(text, words){ const l=(text||"").toLowerCase(); return words.some(w=>l.includes(w)); }
+  const now = ()=>ctx.currentTime;
+
+  /* ---- voices ---- */
+  function kick(t){
+    const k = state.kick||"";
+    const hard = has(k,["distort","punish","slam","overdriv","hardcore","metallic"]);
+    const longd = has(k,["rumble","tunnel","cavern","reverb","decay"]);
+    const o=ctx.createOscillator(), g=ctx.createGain(), sh=ctx.createWaveShaper();
+    const dur = longd?0.62:0.34;
+    o.frequency.setValueAtTime(hard?165:135,t);
+    o.frequency.exponentialRampToValueAtTime(hard?42:38,t+0.055);
+    o.frequency.exponentialRampToValueAtTime(31,t+dur);
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(hard?1.25:1.0,t+0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    sh.curve = curve(hard?55:18);
+    o.connect(g); g.connect(sh); sh.connect(comp);
+    o.start(t); o.stop(t+dur+0.05);
+    // click transient
+    const n=noise(0.02), ng=ctx.createGain(), hp=ctx.createBiquadFilter();
+    hp.type="highpass"; hp.frequency.value=1200;
+    ng.gain.setValueAtTime(hard?0.5:0.28,t); ng.gain.exponentialRampToValueAtTime(0.0001,t+0.02);
+    n.connect(hp); hp.connect(ng); ng.connect(comp); n.start(t); n.stop(t+0.03);
+  }
+  function curve(amount){
+    const n=1024, c=new Float32Array(n), k=amount;
+    for(let i=0;i<n;i++){ const x=i*2/n-1; c[i]=(1+k)*x/(1+k*Math.abs(x)); }
+    return c;
+  }
+  function noise(dur){
+    const len=Math.max(1,Math.floor(ctx.sampleRate*dur));
+    const buf=ctx.createBuffer(1,len,ctx.sampleRate), d=buf.getChannelData(0);
+    for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+    const src=ctx.createBufferSource(); src.buffer=buf; return src;
+  }
+  function hat(t, open){
+    const dur = open?0.16:0.045;
+    const n=noise(dur+0.02), hp=ctx.createBiquadFilter(), g=ctx.createGain();
+    hp.type="highpass"; hp.frequency.value= open?7000:9000;
+    g.gain.setValueAtTime(open?0.20:0.13,t);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    n.connect(hp); hp.connect(g); g.connect(comp); n.start(t); n.stop(t+dur+0.02);
+  }
+  function clap(t){
+    const dur=0.19, n=noise(dur+0.05), bp=ctx.createBiquadFilter(), g=ctx.createGain();
+    bp.type="bandpass"; bp.frequency.value=1700; bp.Q.value=1.1;
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.linearRampToValueAtTime(0.55,t+0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    n.connect(bp); bp.connect(g); g.connect(comp); n.start(t); n.stop(t+dur+0.05);
+  }
+  function bassNote(t, midi, dur, duckT){
+    const b = state.bassVoice||"";
+    const acid = has(b,["acid","303","squelch","resonan"]);
+    const growl = has(b,["reese","fm","growl","distort","gravel","overdriv","grit","hardcore"]);
+    const o1=ctx.createOscillator(), o2=ctx.createOscillator();
+    const f=ctx.createBiquadFilter(), g=ctx.createGain(), sh=ctx.createWaveShaper();
+    o1.type = acid?"sawtooth":(growl?"sawtooth":"square");
+    o2.type = "sine";
+    o1.frequency.setValueAtTime(freqOf(midi),t);
+    o2.frequency.setValueAtTime(freqOf(midi-12),t);
+    if(growl){ o2.type="sawtooth"; o2.detune.setValueAtTime(14,t); }
+    f.type="lowpass"; f.Q.value = acid?12:(growl?4:1.2);
+    const fo = acid? 340+2400*Math.pow(arng(),1.6) : (growl?1500:820);
+    f.frequency.setValueAtTime(fo,t);
+    f.frequency.exponentialRampToValueAtTime(acid?170:420, t+Math.min(dur,0.30));
+    sh.curve = curve(growl?40:8);
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(0.42,t+0.012);
+    // sidechain-style duck under the kick
+    if(duckT) g.gain.setTargetAtTime(0.10, duckT, 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o1.connect(f); o2.connect(f); f.connect(sh); sh.connect(g); g.connect(comp);
+    o1.start(t); o2.start(t); o1.stop(t+dur+0.03); o2.stop(t+dur+0.03);
+  }
+  let leadDelay=null, leadFb=null;
+  function leadBus(){
+    if(leadDelay) return leadDelay;
+    leadDelay = ctx.createDelay(1.5);
+    leadFb = ctx.createGain(); leadFb.gain.value=0.34;
+    const wet = ctx.createGain(); wet.gain.value=0.30;
+    leadDelay.connect(leadFb); leadFb.connect(leadDelay);
+    leadDelay.connect(wet); wet.connect(comp);
+    return leadDelay;
+  }
+  function leadNote(t, midi, dur, vel){
+    const L = state.leadVoice||"";
+    const supersaw = has(L,["supersaw","saw","stack","unison","razor","trance"]);
+    const bell = has(L,["bell","fm","glass","crystal","marimba"]);
+    const g=ctx.createGain(), f=ctx.createBiquadFilter();
+    f.type="lowpass"; f.frequency.setValueAtTime(bell?6000:3200,t);
+    f.frequency.exponentialRampToValueAtTime(bell?2400:1500,t+dur);
+    f.Q.value=1.4;
+    const voices = supersaw?3:(bell?2:1);
+    for(let i=0;i<voices;i++){
+      const o=ctx.createOscillator();
+      o.type = bell ? "sine" : (supersaw?"sawtooth":"square");
+      o.frequency.setValueAtTime(freqOf(midi + (bell&&i? 12:0)),t);
+      o.detune.setValueAtTime((i-(voices-1)/2)*(supersaw?16:6),t);
+      o.connect(f); o.start(t); o.stop(t+dur+0.05);
+    }
+    const peak = 0.16*(vel||1);
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(peak,t+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    f.connect(g); g.connect(comp); g.connect(leadBus());
+  }
+
+  /* ---- pattern derived from state ---- */
+  function melodicVel(){
+    return {light:0.55, balanced:0.85, strong:1.15, dominant:1.45}[state.melodicForce||"balanced"];
+  }
+  function motif(){
+    // deterministic 8-note motif in the current scale, shaped by contour text
+    const r = mulberry32((state.seed>>>0) ^ 0x9e3779b9);
+    const c = (state.contour||"").toLowerCase();
+    const len = scaleOf(state).iv.length;
+    const out=[];
+    let d = 0;
+    for(let i=0;i<8;i++){
+      if(c.includes("rising")||c.includes("soaring")||c.includes("climb")) d += (r()<0.72?1:-1);
+      else if(c.includes("falling")||c.includes("descend")||c.includes("plung")||c.includes("weep")) d -= (r()<0.72?1:-1);
+      else if(c.includes("arch")) d += (i<4?1:-1);
+      else if(c.includes("valley")) d += (i<4?-1:1);
+      else if(c.includes("leap")||c.includes("wide")||c.includes("jagged")) d += (r()<0.5?-2:2);
+      else d += Math.round((r()*4)-2);
+      d = Math.max(-len, Math.min(len+2, d));
+      out.push(d);
+    }
+    out[0]=0;
+    return out;
+  }
+  let MOTIF = null;
+
+  function schedule(t, i){
+    const s16 = i % 16;
+    const bar = Math.floor(i/16);
+    const spb = 60/(state.bpm||140);
+    const st  = spb/4;
+    const sw  = swingAmt();
+    const off = (s16%2===1) ? st*sw : 0;
+    const T = t + off;
+
+    if(!state.hidden.drumsCard){
+      if(s16%4===0) kick(T);
+      const hats=(state.hats||"").toLowerCase();
+      const dense = hats.includes("32nd")||hats.includes("machine-gun");
+      if(dense || s16%2===1) hat(T, s16%4===2 && hats.includes("open"));
+      if(dense && s16%2===0) hat(t+st*0.5,false);
+      if(s16===4||s16===12) clap(T);
+      // tom fill on last bar of a 4-bar phrase
+      if(bar%4===3 && s16>=12) hat(T,true);
+    }
+    if(!state.hidden.bassCard){
+      const m=(state.bassMovement||"").toLowerCase();
+      const roll = m.includes("octave")||m.includes("16th")||m.includes("gallop");
+      const play = roll ? (s16%2===1) : (s16%4===2 || s16%8===7);
+      if(play){
+        const deg = roll && (s16%8===5) ? 0 : 0;
+        const oct = roll && (s16%4===3) ? 2 : 1;
+        bassNote(T, scaleNote(state, deg, oct), st*1.4, t+(s16<12?(4-(s16%4))*st:0));
+      }
+    }
+    if(!state.hidden.feelCard){
+      const v = melodicVel();
+      const arpy = /arp|16th|racing|fast/i.test((state.arpeggio||"")+(state.rhythm||""));
+      if(arpy){
+        if(s16%2===0){
+          const n = MOTIF[(i/2|0)%MOTIF.length];
+          leadNote(T, scaleNote(state, n, 4), st*1.6, v*0.8);
+        }
+      } else if(s16%4===0){
+        const n = MOTIF[(i/4|0)%MOTIF.length];
+        leadNote(T, scaleNote(state, n, 4), st*3.2, v);
+      }
+      // dominant force → octave double on the downbeat
+      if((state.melodicForce==="dominant") && s16===0){
+        leadNote(T, scaleNote(state, MOTIF[bar%MOTIF.length], 5), st*3.0, v*0.5);
+      }
+    }
+  }
+  function swingAmt(){
+    const sw=(state.swing||"").toLowerCase();
+    if(sw.includes("straight")||sw.includes("rigid")||sw.includes("machine-locked")) return 0;
+    if(sw.includes("triplet")) return 0.30;
+    if(sw.includes("loose")||sw.includes("lazy")||sw.includes("humaniz")) return 0.22;
+    if(sw.includes("hardgroove")||sw.includes("swung")||sw.includes("shuffle")) return 0.17;
+    return 0.08;
+  }
+  function loop(){
+    const spb=60/(state.bpm||140), st=spb/4;
+    while(nextTime < now()+LOOKAHEAD){
+      schedule(nextTime, step);
+      step++; nextTime += st;
+      curBar = Math.floor(step/16);
+    }
+    updateHud();
+  }
+  function updateHud(){
+    const el=$("audHud"); if(!el||!playing) return;
+    el.textContent = "▶ "+(state.bpm||140)+" BPM · "+keyName(state)+" · bar "+((curBar%8)+1)+"/8";
+  }
+
+  function start(){
+    if(!ensure()){ toast("Web Audio unavailable in this browser"); return; }
+    if(ctx.state==="suspended") ctx.resume();
+    if(playing) return;
+    arng = mulberry32((state.seed>>>0)||1);
+    MOTIF = motif();
+    playing=true; step=0; curBar=0; nextTime = now()+0.08; startedAt=now();
+    timer = setInterval(loop, TICK);
+    $("auditionBtn").classList.add("on");
+    $("auditionBtn").innerHTML = '<span class="led"></span>■ Stop audition';
+    updateHud();
+  }
+  function stop(){
+    playing=false;
+    if(timer) clearInterval(timer); timer=null;
+    if(master){ /* let tails ring naturally */ }
+    const b=$("auditionBtn");
+    if(b){ b.classList.remove("on"); b.innerHTML='<span class="led"></span>▶ Audition loop'; }
+    const el=$("audHud"); if(el) el.textContent="Idle — press play to hear this recipe.";
+  }
+  function toggle(){ playing ? stop() : start(); }
+  function isPlaying(){ return playing; }
+  function refresh(){ if(playing){ MOTIF = motif(); } }
+  function setVolume(v){ if(master) master.gain.value = v; }
+  return {toggle, start, stop, isPlaying, refresh, setVolume};
+})();
+
+/* ==================================================================
+   ENGINEER PACK — mix/master + DJ metadata derived from the recipe
+   ================================================================== */
+function estimatedLengthSec(){
+  const base = {compact:200, standard:330, extended:480}[state.duration||"standard"];
+  const bpmAdj = Math.round(base * (140/(state.bpm||140)) * 0.35 + base*0.65);
+  return bpmAdj;
+}
+function fmtTime(sec){ const m=Math.floor(sec/60), s=Math.round(sec%60); return m+":"+String(s).padStart(2,"0"); }
+function barsFor(sec){ return Math.round(sec / (60/(state.bpm||140)) / 4); }
+function engineerLines(){
+  const sc = scaleOf(state);
+  const bpm = state.bpm||140;
+  const out = [];
+  out.push("KEY: " + keyName(state) + " (Camelot " + camelot(state) + ") — " + sc.mood + ".");
+  out.push("TEMPO: " + bpm + " BPM, " + fmtTime(estimatedLengthSec()) + " target runtime (~" + barsFor(estimatedLengthSec()) + " bars).");
+  const kickHz = Math.round(freqOf(scaleNote(state,0,1)));
+  out.push("LOW END: tune the kick body near " + kickHz + " Hz (root of the key), sub and kick sharing one fundamental, everything below 30 Hz filtered out.");
+  out.push("SIDECHAIN: bass and pads ducked to the kick, " + (bpm>=145?"fast 40 ms":"punchy 60 ms") + " release, pumping locked to the four-on-the-floor.");
+  out.push("STEREO: kick and sub dead centre in mono, hats and percussion wide, lead spread hard with a haze of stereo delay.");
+  out.push("MASTER: loud club master, glue compression on the buss, saturated peaks, headroom pushed for maximum-energy playback.");
+  return out;
+}
+function djLines(){
+  const bpm = state.bpm||140;
+  return [
+    "CUE: intro is beatmatch-friendly, drums first, full energy by the second phrase.",
+    "MIX RANGE: pairs cleanly with " + (bpm-4) + "–" + (bpm+4) + " BPM tracks in Camelot " + camelot(state) + " and its neighbours.",
+    "SLOT: " + (bpm>=150?"peak-hour hammer":(bpm>=140?"main-room peak time":"driving warm-up into peak")) + "."
+  ];
+}
+
+/* ==================================================================
+   ENERGY ARC — section-by-section timeline of the track
+   Derived from duration + BPM + melodic force. Gives Suno (and you)
+   an explicit shape instead of one flat wall of adjectives.
+   ================================================================== */
+const ARC_TEMPLATES = {
+  compact:  [["Intro",8,45],["Build",16,70],["Drop",32,100],["Breakdown",16,55],["Climax",32,100],["Outro",8,35]],
+  standard: [["Intro",16,40],["Build",16,68],["Drop",32,100],["Breakdown",24,52],["Build",16,78],["Climax",32,100],["Outro",16,30]],
+  extended: [["Intro",24,35],["Build",24,62],["Drop",32,95],["Breakdown",24,48],["Build",16,75],["Drop",32,100],["Breakdown",16,58],["Climax",48,100],["Outro",24,28]]
+};
+function energyArc(){
+  const tpl = ARC_TEMPLATES[state.duration||"standard"];
+  const spb = 60/(state.bpm||140);
+  const boost = {light:-6, balanced:0, strong:5, dominant:9}[state.melodicForce||"balanced"];
+  let bar = 0;
+  return tpl.map(([name,bars,energy])=>{
+    const startSec = bar*4*spb;
+    bar += bars;
+    const e = Math.max(20, Math.min(100, energy + (/Drop|Climax/.test(name)?boost:Math.round(boost/2))));
+    return {name, bars, energy:e, start:startSec, startLabel:fmtTime(startSec)};
+  });
+}
+function arcTotalSec(){
+  const spb = 60/(state.bpm||140);
+  return energyArc().reduce((a,s)=>a+s.bars,0)*4*spb;
+}
+function arcLine(){
+  return energyArc().map(s=>s.name+" "+s.bars+" bars @"+s.energy+"%").join(" → ");
+}
+function renderArc(){
+  const wrap = $("arcBox"); if(!wrap) return;
+  const arc = energyArc();
+  wrap.innerHTML = arc.map(s=>
+    '<div class="arcseg" title="'+escapeHtml(s.name+" · "+s.bars+" bars · starts "+s.startLabel)+'" style="flex:'+s.bars+'">'+
+      '<div class="arcbar"><div class="arcfill" style="height:'+s.energy+'%"></div></div>'+
+      '<div class="arcname">'+escapeHtml(s.name)+'</div>'+
+      '<div class="arcmeta">'+s.bars+'b</div>'+
+    '</div>').join("");
+  const tot = $("arcTotal");
+  if(tot) tot.textContent = fmtTime(arcTotalSec()) + " · " + arc.reduce((a,s)=>a+s.bars,0) + " bars · " + (state.bpm||140) + " BPM";
+}
+function arcTags(){
+  return energyArc().map(s=>"["+s.name+"]").join("\n");
+}
+
+/* ==================================================================
+   PROMPT SCORE — quantified feedback on the current recipe
+   Nudges toward prompts that actually perform well on Suno rather
+   than just being long.
+   ================================================================== */
+function scorePrompt(){
+  const sp = buildStylePrompt();
+  const items = [];
+  const len = sp.length;
+  // length: sweet spot 480–900 chars
+  let lenScore = len<250 ? 40 : len<400 ? 70 : len<=900 ? 100 : len<=1000 ? 82 : 50;
+  items.push({label:"Prompt length", score:lenScore,
+    note: len<400 ? "Short — add detail layers or unhide a section." : len>900 ? "Near the ceiling; trim if Suno truncates." : "In the sweet spot."});
+  // melody presence
+  const melo = /Lead:|Melody-driven|Melody-dominant/.test(sp);
+  const force = state.melodicForce||"balanced";
+  const meloScore = !melo ? 0 : force==="light" ? 72 : force==="balanced" ? 92 : 100;
+  items.push({label:"Melodic clarity", score:meloScore,
+    note: !melo ? "Melody missing — unhide Feeling & Melody." : force==="light" ? "Light force; raise it for a stronger hook." : "Melody is clearly led."});
+  // specificity: count concrete nouns/roles present
+  const parts = ["Bass:","Drums:","Harmony:","Arrangement:","Concept:"].filter(k=>sp.includes(k)).length;
+  items.push({label:"Instrumentation coverage", score:Math.round(parts/5*100),
+    note: parts===5 ? "Every layer specified." : (5-parts)+" section(s) hidden from the prompt."});
+  // style focus: too many styles dilutes
+  const styleWords = styleLine().split(/,|with|fused/).length;
+  const focusScore = styleWords<=3 ? 100 : styleWords<=4 ? 85 : 65;
+  items.push({label:"Style focus", score:focusScore,
+    note: focusScore===100 ? "Tight, unambiguous genre signal." : "Consider fusing or clearing the secondary style."});
+  // energy language density
+  const energyWords = (sp.match(/\b(maximum|relentless|explosive|brutal|massive|huge|ferocious|unstoppable|driving|crushing|slamming|overdrive|peak|euphoric|thunderous)\b/gi)||[]).length;
+  const eScore = energyWords>=6 ? 100 : energyWords>=4 ? 88 : energyWords>=2 ? 70 : 45;
+  items.push({label:"Energy density", score:eScore,
+    note: energyWords>=4 ? energyWords+" high-energy cues." : "Roll drums/intensity for more punch."});
+  // key definition
+  const keyScore = state.hidden.key ? 55 : 100;
+  items.push({label:"Harmonic definition", score:keyScore,
+    note: state.hidden.key ? "Key hidden — Suno will pick its own." : keyName(state)+" locked in."});
+  const total = Math.round(items.reduce((a,i)=>a+i.score,0)/items.length);
+  return {total, items};
+}
+function scoreClass(n){ return n>=85 ? "good" : n>=65 ? "mid" : "bad"; }
+function renderScore(){
+  const box = $("scoreBox"); if(!box) return;
+  const {total, items} = scorePrompt();
+  $("scoreTotal").textContent = total;
+  $("scoreTotal").className = "scoretotal " + scoreClass(total);
+  box.innerHTML = items.map(i=>
+    '<div class="scorerow">'+
+      '<span class="sname">'+escapeHtml(i.label)+'</span>'+
+      '<span class="sbar"><span class="sfill '+scoreClass(i.score)+'" style="width:'+i.score+'%"></span></span>'+
+      '<span class="snum '+scoreClass(i.score)+'">'+i.score+'</span>'+
+      '<span class="snote">'+escapeHtml(i.note)+'</span>'+
+    '</div>').join("");
+}
+
+/* ==================================================================
+   A/B COMPARE — park an idea in slot B and flip between them
+   ================================================================== */
+let slotB = null;
+function stashB(){
+  slotB = encodeState(state);
+  try{ localStorage.setItem("tetech_slotb", slotB); }catch(e){}
+  renderAB(); toast("📌 Stashed to slot B");
+}
+function swapAB(){
+  if(!slotB){ toast("Nothing in slot B — stash first"); return; }
+  const incoming = decodeState(slotB);
+  if(!incoming){ toast("Slot B unreadable"); return; }
+  const outgoing = encodeState(state);
+  commit();
+  state = incoming; rng = mulberry32(state.seed);
+  slotB = outgoing;
+  try{ localStorage.setItem("tetech_slotb", slotB); }catch(e){}
+  afterChange(); toast("🔄 Swapped A ⇄ B");
+}
+function renderAB(){
+  const el = $("abInfo"); if(!el) return;
+  if(!slotB){ el.textContent = "Slot B empty."; $("swapABBtn").disabled = true; return; }
+  const s = decodeState(slotB);
+  $("swapABBtn").disabled = false;
+  el.textContent = s ? ((s.concept&&s.concept.title)||"Untitled") + " · " + s.primaryStyle + " · " + s.bpm + " BPM" : "Slot B unreadable.";
+}
+
+/* ==================================================================
+   COMMAND PALETTE + SHORTCUTS
+   Every action in the app reachable from the keyboard in two keystrokes.
+   ================================================================== */
+const COMMANDS = [
+  {icon:"⚡", name:"Power roll everything",        key:"P",     run:()=>doRoll("power")},
+  {icon:"🎲", name:"Generate 3 variations",        key:"V",     run:()=>doRoll("variations")},
+  {icon:"▶",  name:"Toggle audition loop",         key:"Space", run:()=>Audition.toggle()},
+  {icon:"🎭", name:"Roll feeling → melody",        key:"F",     run:()=>doRoll("feel-melody")},
+  {icon:"🎼", name:"Roll melody",                  key:"M",     run:()=>doRoll("melody")},
+  {icon:"🔊", name:"Roll bass",                    key:"B",     run:()=>doRoll("bass")},
+  {icon:"🥁", name:"Roll drums",                   key:"D",     run:()=>doRoll("drums")},
+  {icon:"💡", name:"Roll concept",                 key:"C",     run:()=>doRoll("concept")},
+  {icon:"🎛", name:"Roll arrangement",             key:"A",     run:()=>doRoll("arrangement")},
+  {icon:"🎹", name:"Roll key / scale",             key:"K",     run:()=>doRoll("key")},
+  {icon:"🥁", name:"Roll BPM",                     key:"",      run:()=>doRoll("bpm")},
+  {icon:"🎨", name:"Roll primary style",           key:"",      run:()=>doRoll("primary")},
+  {icon:"🎨", name:"Roll secondary style",         key:"",      run:()=>doRoll("secondary")},
+  {icon:"🔀", name:"Fuse primary + secondary",     key:"",      run:()=>doRoll("fuse")},
+  {icon:"📜", name:"Browse style library",         key:"L",     run:()=>openPicker("primary")},
+  {icon:"📋", name:"Copy style prompt",            key:"⌘C",    run:()=>{ const t=buildStylePrompt(); copyText(t,"Style prompt"); addHistory("style",t,state); }},
+  {icon:"📄", name:"Copy full brief",              key:"",      run:()=>{ const t=buildFullBrief(); copyText(t,"Full brief"); addHistory("brief",t,state); }},
+  {icon:"📦", name:"Copy Suno kit",                key:"",      run:()=>{ const t=buildKit(); copyText(t,"Suno kit"); addHistory("kit",t,state); }},
+  {icon:"🎚", name:"Copy engineer notes",          key:"",      run:()=>copyText(buildEngineer(),"Engineer notes")},
+  {icon:"🔗", name:"Copy share link",              key:"S",     run:()=>shareURL()},
+  {icon:"💾", name:"Export session as JSON",       key:"",      run:()=>exportSession()},
+  {icon:"📥", name:"Import session from JSON",     key:"",      run:()=>importSession()},
+  {icon:"🎤", name:"Toggle instrumental safety",   key:"I",     run:()=>toggleInstrumental()},
+  {icon:"↶",  name:"Undo",                         key:"⌘Z",    run:()=>undo()},
+  {icon:"↷",  name:"Redo",                         key:"⌘⇧Z",   run:()=>redo()},
+  {icon:"🔓", name:"Unlock everything",            key:"",      run:()=>{ commit(); Object.keys(state.locks).forEach(k=>state.locks[k]=false); afterChange(); toast("🔓 All unlocked"); }},
+  {icon:"🔒", name:"Lock everything",              key:"",      run:()=>{ commit(); Object.keys(ROLL_FN).forEach(k=>state.locks[k]=true); afterChange(); toast("🔒 All locked"); }},
+  {icon:"👁", name:"Show all sections",            key:"",      run:()=>{ commit(); Object.keys(state.hidden).forEach(k=>state.hidden[k]=false); afterChange(); toast("👁 All sections shown"); }},
+  {icon:"🧹", name:"Clear all detail layers",      key:"",      run:()=>{ commit(); state.layers={}; afterChange(); toast("Layers cleared"); }},
+  {icon:"📌", name:"Stash current idea to slot B",  key:"",      run:()=>stashB()},
+  {icon:"🔄", name:"Swap A ⇄ B",                   key:"",      run:()=>swapAB()},
+  {icon:"🏷", name:"Copy arrangement section tags", key:"",      run:()=>copyText(arcTags(),"Section tags")},
+  {icon:"⌨",  name:"Keyboard shortcuts",           key:"?",     run:()=>$("helpModal").classList.add("open")}
+];
+let cmdSel = 0, cmdFiltered = COMMANDS.slice();
+function openCmd(){
+  $("cmdSearch").value=""; cmdSel=0; renderCmd("");
+  $("cmdModal").classList.add("open");
+  setTimeout(()=>$("cmdSearch").focus(), 30);
+}
+function closeCmd(){ $("cmdModal").classList.remove("open"); }
+function fuzzy(q, s){
+  q=q.toLowerCase(); s=s.toLowerCase();
+  if(!q) return true;
+  let i=0; for(const ch of s){ if(ch===q[i]) i++; if(i===q.length) return true; }
+  return false;
+}
+function renderCmd(q){
+  cmdFiltered = COMMANDS.filter(c=>fuzzy(q,c.name));
+  if(cmdSel >= cmdFiltered.length) cmdSel = Math.max(0, cmdFiltered.length-1);
+  const list = $("cmdList");
+  if(!cmdFiltered.length){ list.innerHTML='<div class="readout">No matching command.</div>'; return; }
+  list.innerHTML = cmdFiltered.map((c,i)=>
+    '<div class="cmditem'+(i===cmdSel?' sel':'')+'" data-cmd="'+i+'">'+
+    '<span class="cicon">'+c.icon+'</span><span class="cname">'+escapeHtml(c.name)+'</span>'+
+    '<span class="ckey">'+escapeHtml(c.key||"")+'</span></div>').join("");
+  const sel = list.querySelector(".cmditem.sel");
+  if(sel && typeof sel.scrollIntoView === "function") sel.scrollIntoView({block:"nearest"});
+}
+function runCmd(i){
+  const c = cmdFiltered[i]; if(!c) return;
+  closeCmd();
+  setTimeout(()=>c.run(), 10);
+}
+function renderKeyTable(){
+  const rows = [
+    ["⌘K / Ctrl+K","Command palette"],["P","Power roll everything"],["V","Generate 3 variations"],
+    ["Space","Play / stop audition"],["F","Roll feeling → melody"],["M","Roll melody"],["B","Roll bass"],
+    ["D","Roll drums"],["C","Roll concept"],["A","Roll arrangement"],["K","Roll key / scale"],
+    ["L","Style library"],["I","Toggle instrumental safety"],["S","Copy share link"],
+    ["⌘C / Ctrl+C","Copy current output"],["1 – 4","Switch output tab"],
+    ["⌘Z","Undo"],["⌘⇧Z / ⌘Y","Redo"],["?","This panel"],["Esc","Close any panel"]
+  ];
+  $("keyTable").innerHTML = rows.map(r=>'<kbd>'+escapeHtml(r[0])+'</kbd><span class="kd">'+escapeHtml(r[1])+'</span>').join("");
+}
+
+/* ==================================================================
+   SESSION IMPORT / EXPORT — portable JSON backup of everything
+   ================================================================== */
+function exportSession(){
+  const data = {
+    app:"NEON FORGE", version:2, exported:new Date().toISOString(),
+    current: encodeState(state),
+    presets: loadPresets(),
+    history: history.slice(0,40)
+  };
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "neon-forge-" + (state.concept.title||"session").toLowerCase().replace(/[^a-z0-9]+/g,"-") + ".json";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+  toast("💾 Session exported");
+}
+function importSession(){
+  const inp = document.createElement("input");
+  inp.type="file"; inp.accept="application/json,.json";
+  inp.addEventListener("change", ()=>{
+    const f = inp.files && inp.files[0]; if(!f) return;
+    const r = new FileReader();
+    r.onload = ()=>{
+      try{
+        const data = JSON.parse(r.result);
+        const s = decodeState(data.current);
+        if(!s) throw new Error("bad state");
+        commit(); state = s; rng = mulberry32(state.seed);
+        if(data.presets && typeof data.presets==="object") savePresets(Object.assign(loadPresets(), data.presets));
+        if(Array.isArray(data.history)){ history = data.history.concat(history).slice(0,MAX_HISTORY_ITEMS); saveHistory(); }
+        afterChange(); renderHistory();
+        toast("📥 Session imported");
+      }catch(e){ toast("Import failed — not a NEON FORGE file"); }
+    };
+    r.readAsText(f);
+  });
+  inp.click();
+}
+
 /* ---------------------------- EVENTS ---------------------------- */
 document.addEventListener("click", e=>{
   const roll = e.target.closest("[data-roll]");
@@ -1759,9 +2744,9 @@ $("undoBtn").addEventListener("click", undo);
 $("redoBtn").addEventListener("click", redo);
 $("shareBtn").addEventListener("click", shareURL);
 $("copyBtn").addEventListener("click", ()=>{
-  const kind = currentTab==="style" ? "style" : currentTab==="brief" ? "brief" : "kit";
-  const text = currentTab==="style" ? buildStylePrompt() : currentTab==="brief" ? buildFullBrief() : buildKit();
-  copyText(text, currentTab==="style"?"Style prompt":currentTab==="brief"?"Full brief":"Suno kit");
+  const kind = currentTab==="style" ? "style" : currentTab==="brief" ? "brief" : currentTab==="eng" ? "engineer" : "kit";
+  const text = currentTab==="style" ? buildStylePrompt() : currentTab==="brief" ? buildFullBrief() : currentTab==="eng" ? buildEngineer() : buildKit();
+  copyText(text, {style:"Style prompt",brief:"Full brief",engineer:"Engineer notes",kit:"Suno kit"}[kind]);
   addHistory(kind, text, state);
 });
 $("copyKitBtn").addEventListener("click", ()=>{
@@ -1769,10 +2754,24 @@ $("copyKitBtn").addEventListener("click", ()=>{
   copyText(text, "Suno kit");
   addHistory("kit", text, state);
 });
+$("rootSel").addEventListener("change", e=>{ commit(); state.rootPc = parseInt(e.target.value); afterChange(); });
+$("scaleSel").addEventListener("change", e=>{ commit(); state.scaleId = e.target.value; syncHarmonicColor(state); afterChange(); });
+$("auditionBtn").addEventListener("click", ()=>Audition.toggle());
+$("audVol").addEventListener("input", e=>Audition.setVolume(parseInt(e.target.value)/100));
+$("copyEngBtn").addEventListener("click", ()=>{
+  copyText("ENGINEER NOTES — " + (state.concept.title||"Untitled") + "\n\n" + engineerLines().concat(djLines()).join("\n"), "Engineer notes");
+});
 $("instrumentalToggle").addEventListener("click", toggleInstrumental);
 $("vocalToggle").addEventListener("click", toggleVocal);
 $("savePresetBtn").addEventListener("click", savePreset);
 $("clearHistoryBtn").addEventListener("click", clearHistory);
+$("cmdBtn").addEventListener("click", openCmd);
+$("stashBBtn").addEventListener("click", stashB);
+$("swapABBtn").addEventListener("click", swapAB);
+$("copyArcBtn").addEventListener("click", ()=>copyText(arcTags(),"Section tags"));
+$("helpBtn").addEventListener("click", ()=>$("helpModal").classList.add("open"));
+$("exportBtn").addEventListener("click", exportSession);
+$("importBtn").addEventListener("click", importSession);
 
 $("styleModalClose").addEventListener("click", ()=>$("styleModal").classList.remove("open"));
 $("styleModal").addEventListener("click", e=>{ if(e.target.id==="styleModal") $("styleModal").classList.remove("open"); });
@@ -1790,16 +2789,85 @@ $("bpmInput").addEventListener("change", e=>{
   commit(); state.bpm = v; afterChange();
 });
 
+/* command palette wiring */
+$("cmdSearch").addEventListener("input", e=>{ cmdSel=0; renderCmd(e.target.value); });
+$("cmdSearch").addEventListener("keydown", e=>{
+  if(e.key==="ArrowDown"){ e.preventDefault(); cmdSel=Math.min(cmdSel+1,cmdFiltered.length-1); renderCmd($("cmdSearch").value); }
+  else if(e.key==="ArrowUp"){ e.preventDefault(); cmdSel=Math.max(cmdSel-1,0); renderCmd($("cmdSearch").value); }
+  else if(e.key==="Enter"){ e.preventDefault(); runCmd(cmdSel); }
+});
+$("cmdList").addEventListener("click", e=>{
+  const it = e.target.closest("[data-cmd]");
+  if(it) runCmd(parseInt(it.getAttribute("data-cmd")));
+});
+$("cmdModal").addEventListener("click", e=>{ if(e.target.id==="cmdModal") closeCmd(); });
+$("helpClose").addEventListener("click", ()=>$("helpModal").classList.remove("open"));
+$("helpModal").addEventListener("click", e=>{ if(e.target.id==="helpModal") $("helpModal").classList.remove("open"); });
+
+function typingInField(el){
+  return el && (el.tagName==="INPUT"||el.tagName==="TEXTAREA"||el.tagName==="SELECT"||el.isContentEditable);
+}
 document.addEventListener("keydown", e=>{
   const mod = e.ctrlKey || e.metaKey;
-  if(mod && (e.key==="z"||e.key==="Z")){ e.preventDefault(); if(e.shiftKey) redo(); else undo(); }
-  else if(mod && (e.key==="y"||e.key==="Y")){ e.preventDefault(); redo(); }
-  else if(e.key==="p"||e.key==="P"){
-    if(e.target && (e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA"||e.target.tagName==="SELECT")) return;
-    e.preventDefault(); doRoll("power");
+
+  // command palette — works even while typing elsewhere
+  if(mod && (e.key==="k"||e.key==="K")){ e.preventDefault(); $("cmdModal").classList.contains("open")?closeCmd():openCmd(); return; }
+
+  if(e.key==="Escape"){
+    $("styleModal").classList.remove("open");
+    $("helpModal").classList.remove("open");
+    closeCmd();
+    return;
   }
-  else if(e.key==="Escape"){ $("styleModal").classList.remove("open"); }
+  if($("cmdModal").classList.contains("open")) return;
+
+  if(mod && (e.key==="z"||e.key==="Z")){ e.preventDefault(); if(e.shiftKey) redo(); else undo(); return; }
+  if(mod && (e.key==="y"||e.key==="Y")){ e.preventDefault(); redo(); return; }
+  if(mod && (e.key==="c"||e.key==="C")){
+    // only hijack copy when the user has no text selection of their own
+    const sel = window.getSelection && String(window.getSelection());
+    if(!sel && !typingInField(e.target)){ e.preventDefault(); $("copyBtn").click(); }
+    return;
+  }
+  if(typingInField(e.target)) return;
+
+  const k = e.key.toLowerCase();
+  const single = {
+    p:()=>doRoll("power"), v:()=>doRoll("variations"), f:()=>doRoll("feel-melody"),
+    m:()=>doRoll("melody"), b:()=>doRoll("bass"), d:()=>doRoll("drums"),
+    c:()=>doRoll("concept"), a:()=>doRoll("arrangement"), k:()=>doRoll("key"),
+    l:()=>openPicker("primary"), i:()=>toggleInstrumental(), s:()=>shareURL()
+  };
+  if(e.key===" "){ e.preventDefault(); Audition.toggle(); return; }
+  if(e.key==="?"){ e.preventDefault(); $("helpModal").classList.add("open"); return; }
+  if(["1","2","3","4"].includes(e.key)){
+    e.preventDefault();
+    const tabs=["style","brief","kit","eng"];
+    currentTab = tabs[parseInt(e.key)-1];
+    document.querySelectorAll(".tab").forEach(tb=>tb.classList.toggle("active", tb.getAttribute("data-tab")===currentTab));
+    renderOutput();
+    return;
+  }
+  if(single[k] && !mod && !e.altKey){ e.preventDefault(); single[k](); }
 });
+
+/* ---------------------------- TEST HOOK ----------------------------
+   Read/write access to module-scoped internals for the headless
+   acceptance suite (qa/test.js). Harmless in normal use.
+--------------------------------------------------------------------- */
+window.NF = {
+  get state(){ return state; }, set state(v){ state = v; rng = mulberry32(state.seed); },
+  get currentTab(){ return currentTab; }, set currentTab(v){ currentTab = v; },
+  STYLES, ATOMS, ROLL_FN, GROUPS, SCALES, LAYERS, CONCEPT, MELODY_FORCE, COMMANDS,
+  scaleOf, scaleNote, camelot, keyName, freqOf,
+  buildStylePrompt, buildFullBrief, buildKit, buildEngineer, buildStylePromptFor,
+  encodeState, decodeState, defaultState, doRoll, undo, redo, render, renderOutput,
+  engineerLines, djLines, Audition, openCmd, closeCmd, renderCmd, runCmd,
+  energyArc, arcLine, arcTags, scorePrompt, stashB, swapAB, exportSession,
+  sanitize, isDirty, conceptLine, styleLine,
+  get slotB(){ return slotB; },
+  get cmdFiltered(){ return cmdFiltered; }
+};
 
 /* ---------------------------- INIT ---------------------------- */
 function init(){
@@ -1809,6 +2877,9 @@ function init(){
     const atoms = ATOMS.filter(a=>a.card===cardId);
     $(containerId).innerHTML = atoms.map(fieldRowHtml).join("");
   });
+  // key selects
+  $("rootSel").innerHTML = NOTE_NAMES.map((n,i)=>'<option value="'+i+'">'+n+'</option>').join("");
+  $("scaleSel").innerHTML = SCALES.map(s=>'<option value="'+s.id+'">'+s.n+'</option>').join("");
   // load from URL ?s= first, else last session, else fresh
   let loaded = false;
   const q = new URLSearchParams(location.search).get("s");
@@ -1822,6 +2893,8 @@ function init(){
     rollAllInto(state);
   }
   rng = mulberry32(state.seed);
+  try{ slotB = localStorage.getItem("tetech_slotb") || null; }catch(e){ slotB = null; }
+  renderKeyTable();
   render();
   renderHistory();
   updateURL();
