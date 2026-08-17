@@ -143,5 +143,54 @@ t("sanitizer keeps label when clause dropped", ()=>{
   const out = w.NF.buildStylePrompt();
   return !/^\s*[a-z]/.test(out) || "prompt starts lowercase (orphaned clause)";});
 
+t("reset locks for later tests", ()=>{ Object.keys(w.NF.ROLL_FN).forEach(k=>S().locks[k]=false); return true;});
+t("EMOTION line never disappears", ()=>{ for(let i=0;i<400;i++){ w.NF.doRoll("power");
+  const b=w.NF.buildFullBrief();
+  if(b.indexOf("EMOTION:")<0) return "EMOTION vanished at roll "+i; } return true;});
+t("no pool phrase is self-censoring", ()=>{
+  // any single rolled value that the sanitizer would reject is a pool bug
+  const fields=["feeling","flavor","direction","leadVoice","leadPerf","contour","rhythm","harmony",
+                "arpeggio","bassVoice","bassMovement","bassRel","kick","hats","snare","perc","toms",
+                "groove","swing","sync","intensity","arrangement"];
+  for(let i=0;i<600;i++){ w.NF.doRoll("power"); const s=S();
+    for(const f of fields){ if(s[f] && w.NF.isDirty(String(s[f]).toLowerCase())) return f+" = "+s[f]; }
+    for(const k in (s.melodyConcept||{})){ if(s.melodyConcept[k] && w.NF.isDirty(String(s.melodyConcept[k]).toLowerCase())) return "melodyConcept."+k+" = "+s.melodyConcept[k]; }
+    for(const k in (s.concept||{})){ if(s.concept[k] && w.NF.isDirty(String(s.concept[k]).toLowerCase())) return "concept."+k+" = "+s.concept[k]; }
+  } return true;});
+t("weirdness measurably shifts style mix", ()=>{
+  const cat={}; w.NF.STYLES.forEach(x=>cat[x.n]=x.c);
+  const sample=wd=>{ S().weirdness=wd; let rare=0;
+    for(let i=0;i<600;i++){ w.NF.doRoll("primary"); if(cat[S().primaryStyle]==="rare") rare++; }
+    return rare/600; };
+  const lo=sample(0), hi=sample(100); S().weirdness=50;
+  if(lo>0.12) return "weirdness 0 still gives "+(lo*100).toFixed(0)+"% rare";
+  if(hi<0.60) return "weirdness 100 only gives "+(hi*100).toFixed(0)+"% rare";
+  return true;});
+t("microtonality changes prompt + cents", ()=>{
+  S().microMelody="off"; S().microBass="off"; const plain=w.NF.buildStylePrompt();
+  S().microMelody="quarter"; const micro=w.NF.buildStylePrompt();
+  if(plain===micro) return "prompt unchanged by microtonality";
+  if(!/microtonal/i.test(micro)) return "no microtonal wording";
+  let any=false; for(let i=0;i<12;i++){ if(w.NF.microCents("quarter",i,1)!==0) any=true; }
+  S().microMelody="off";
+  return any || "all cent offsets are zero";});
+t("melody concept rolls + reaches prompt", ()=>{
+  S().hidden.feelCard=false; S().locks.melodyConcept=false;
+  const seen=new Set(); for(let i=0;i<20;i++){ w.NF.doRoll("concept-melody"); seen.add(S().melodyConcept.story); }
+  if(seen.size<8) return "only "+seen.size+" distinct stories";
+  const b=w.NF.buildFullBrief();
+  return /MELODY CONCEPT:/.test(b) || "missing from brief";});
+t("arrangements are plentiful + energetic", ()=>{
+  const seen=new Set(); for(let i=0;i<400;i++){ w.NF.doRoll("arrangement"); seen.add(S().arrangement); }
+  if(seen.size<20) return "only "+seen.size+" distinct arrangements";
+  return true;});
+t("27+ scales, all intervals valid", ()=>{
+  if(w.NF.SCALES.length<27) return "only "+w.NF.SCALES.length;
+  for(const s of w.NF.SCALES){
+    if(!s.iv.length||s.iv[0]!==0) return s.id+" bad root";
+    if(s.iv.some(x=>x<0||x>11)) return s.id+" interval out of range";
+    if(new Set(s.iv).size!==s.iv.length) return s.id+" duplicate intervals";
+  } return true;});
+
 console.log("\n"+pass+" passed, "+fail+" failed");
 process.exit(fail?1:0);

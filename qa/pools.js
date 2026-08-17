@@ -1,24 +1,23 @@
-const fs=require('fs');const{JSDOM,VirtualConsole}=require('jsdom');
-const vc=new VirtualConsole();
-const dom=new JSDOM(fs.readFileSync(require('path').join(__dirname,'..','index.html'),'utf8'),{runScripts:'dangerously',url:'https://x.test/',virtualConsole:vc});
-const w=dom.window;
-const VOCAL=new RegExp("\\\\b(vocal|vocals|voice|voices|vocalist|singer|singers|singing|sings|sung|scream|screams|screaming|screamed|chant|chants|chanting|chanted|choir|choirs|choral|spoken|speaking|speech|lyric|lyrics|lyrical|whisper|whispers|whispering|shout|shouts|shouting|verse|verses|chorus|acapella|a capella|rapper|rappers|rapping|humming|hummed|vox)\\\\b","i");
-const BAD=["minimal","minimalist","minimalism","sparse","restrained","low-energy","low energy","weak","tiny","gentle","quiet"];
-const pools={CONCEPT:w.NF.CONCEPT};
-let hits=[];
-function chk(label,arr){arr.forEach(s=>{ if(typeof s!=="string")return;
-  if(VOCAL.test(s)) hits.push([label,"VOCAL",s]);
-  const l=s.toLowerCase(); BAD.forEach(b=>{if(l.includes(b)) hits.push([label,"MINIMAL:"+b,s]);});});}
-for(const k in w.NF.CONCEPT) chk("CONCEPT."+k, w.NF.CONCEPT[k]);
-chk("STYLES", w.NF.STYLES.map(x=>x.n));
-chk("LAYERS", w.NF.LAYERS.map(x=>x.phrase));
-chk("SCALES", w.NF.SCALES.map(x=>x.mood));
-// scrape remaining top-level string arrays out of source
-const src=fs.readFileSync(require('path').join(__dirname,'..','index.html'),'utf8');
-for(const m of src.matchAll(/const ([A-Z_]+) = \[([\s\S]*?)\n\];/g)){
-  const items=[...m[2].matchAll(/"((?:[^"\\]|\\.)*)"/g)].map(x=>x[1]);
-  chk(m[1], items);
-}
-if(hits.length){console.log("PROBLEM WORDS IN POOLS:");hits.forEach(h=>console.log(" ",h[0],"|",h[1],"|",h[2]));}
-else console.log("All pools clean of vocal + minimal language.");
-console.log("total hits:",hits.length);
+/* Scans every generation pool through the LIVE sanitizer used by the app.
+   Any phrase the app would censor is a pool bug: it silently deletes content
+   from prompts. Run: node qa/pools.js */
+const fs=require('fs'), path=require('path');
+const {JSDOM}=require('jsdom');
+const file=path.join(__dirname,'..','index.html');
+const w=new JSDOM(fs.readFileSync(file,'utf8'),{runScripts:'dangerously',url:'https://x.test/'}).window;
+const bad=[];
+const chk=(lbl,arr)=>arr.forEach(v=>{ if(typeof v==='string' && v && w.NF.isDirty(v.toLowerCase())) bad.push(lbl+' :: '+v); });
+for(const k in w.NF.CONCEPT) chk('CONCEPT.'+k, w.NF.CONCEPT[k]);
+for(const k in w.NF.MELODY_CONCEPT) chk('MELODY_CONCEPT.'+k, w.NF.MELODY_CONCEPT[k]);
+chk('STYLES', w.NF.STYLES.map(s=>s.n));
+chk('LAYERS', w.NF.LAYERS.map(l=>l.phrase));
+chk('SCALES', w.NF.SCALES.map(s=>s.mood));
+chk('MICRO_MODES', w.NF.MICRO_MODES.map(m=>m.desc));
+const src=fs.readFileSync(file,'utf8');
+const NAMES='ARRANGEMENTS|FEELINGS|FLAVORS|DIRECTIONS|LEADS|PERFS|HARMONIES|ARPS|CONTOURS|RHYTHMS|BASS_VOICES|BASS_MOVES|BASS_RELS|KICKS|HATS|SNARES|PERCS|TOMS|GROOVES|SWINGS|SYNCS|INTENSITIES';
+for(const m of src.matchAll(new RegExp('const ('+NAMES+') = \\[([\\s\\S]*?)\\n\\];','g')))
+  chk(m[1], [...m[2].matchAll(/"((?:[^"\\]|\\.)*)"/g)].map(x=>x[1]));
+if(bad.length){ console.log('SELF-CENSORING POOL ENTRIES:'); bad.forEach(b=>console.log('  '+b)); }
+else console.log('All pools pass the live sanitizer.');
+console.log('total problems:', bad.length);
+process.exit(bad.length?1:0);

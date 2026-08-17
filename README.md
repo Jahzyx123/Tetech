@@ -15,16 +15,27 @@ python3 -m http.server 8080
 
 ### Generation
 - **461 curated techno styles** tagged `core` / `sub` / `rare`, searchable in a 📜 picker modal,
-  with style fusion 🔀 and clear ✕. The `weirdness` slider biases the roll toward rare and
-  experimental styles.
+  with style fusion 🔀 and clear ✕.
+- **Weirdness slider that actually bites** — it picks a *category* first, so pool sizes can't
+  swamp it. Sweeps from 71% core / 2% rare at 0 to 3% core / 75% rare at 100, shows the live
+  mix next to the slider, and also biases which scales the key engine chooses.
 - **Emotion-led melody** with a melodic-force level (Light / Balanced / Strong / Dominant).
   Melody is always present — force only changes how much of the prompt it commands, so it can
   never be crowded out by bass, drums or concept.
-- **Key & scale engine** — 14 scales with real semitone intervals, root note selection, and a
+- **Key & scale engine** — 27 scales with real semitone intervals, root note selection, and a
   **Camelot wheel** position for matching the track into a DJ set. Harmonic colour is bound to
   the key, so a prompt can never contradict itself.
 - **10-dimension concept roller** (world, location, visual, narrative, sensation, event,
-  conflict, crowd, title, transformation) with heavily expanded fragment pools.
+  conflict, crowd, title, transformation) — 92 worlds, 93 titles and heavily expanded
+  fragments throughout.
+- **Melody concept roller** — the melody gets its own 4-part narrative brief
+  (story / role in the track / motion / hook shape) so the hook is never an afterthought
+  of the visuals. Rolls on its own button or with feeling→melody.
+- **35 arrangements**, weighted 68% toward fast, groovy, relentless shapes.
+- **Microtonality** — arm it per section on melody and/or bass, with 7 flavours
+  (quarter-tone, sixth-tone, eighth-tone, just intonation, maqam 3/4, analog drift,
+  wide detune). These are real cent offsets: the audition engine bends the oscillators
+  by exactly the amount the prompt describes.
 - Large pools for bass, drums, groove, swing, syncopation and intensity.
 - **24 optional detail layers** (acid, glitch, saturation, sidechain, polyrhythm, …), all OFF
   by default.
@@ -101,6 +112,6 @@ subsystems — key engine, energy arc, scoring, A/B, command palette, and saniti
 
 ```bash
 npm i -D jsdom
-node qa/test.js     # 40 checks
-node qa/pools.js    # scans every word pool for banned language
+node qa/test.js     # 48 checks
+node qa/pools.js    # runs every pool phrase through the live sanitizer
 ```
